@@ -1,0 +1,30 @@
+[33mcommit 28f64e219a9f388315d2faf93ad69e75e7977267[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Merge: ddb7796 7d4e667
+Author: IkerVericat <ivericat@iesmontsia.org>
+Date:   Thu May 29 20:32:59 2025 +0200
+
+    Desa canvis de rutines, exercicis i millores d'interfície
+
+[33mcommit ddb779694d4e1961384bdd2060bbc5e4a83d7069[m
+Author: IkerVericat <ivericat@iesmontsia.org>
+Date:   Thu May 29 19:10:45 2025 +0200
+
+    modificacions de diseny nova rutina
+
+[33mcommit 7d4e667a788c082a7412d170824b92787fc3e6a8[m
+Author: IkerVericat <ikervericat@iesmontsia.org>
+Date:   Wed May 28 09:14:10 2025 +0200
+
+    Update README.txt
+
+[33mcommit 34b9349f332b3d4b0202b4d6d33020a6ed4a47c7[m
+Author: IkerVericat <ivericat@iesmontsia.org>
+Date:   Wed May 28 09:12:09 2025 +0200
+
+    he repartit el backend en diferents documents per realitzar una bona praxis i he afegit contingut al README per orientarme
+
+[33mcommit 622fe5fa8f179b08607d83e7199ca88d1c8b0f25[m
+Author: IkerVericat <ivericat@iesmontsia.org>
+Date:   Tue May 27 08:04:54 2025 +0200
+
+    agregats tots els arxius de FitnessCode
