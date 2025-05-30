@@ -1,5 +1,7 @@
 Guardar codi Github
 
+Avans de modificar el codi realitzar un "git pull origin main" ⚠️‼️
+
 git status
 git add .  |  git add nom_arxiu
 git commit -m "comentari"
