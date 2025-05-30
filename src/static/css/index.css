@@ -60,3 +60,8 @@ body {
         min-height: 100vh;
     }
 }
+
+.dropdown-menu {
+    z-index: 1050;
+    position: absolute;
+}

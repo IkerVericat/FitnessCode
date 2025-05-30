@@ -109,6 +109,27 @@ body {
 
 .agrega_un_exercici button {
     margin-top: 30px;
-    background-color: rgba(241, 241, 93, 0.858);
+    background-color: #ffc107;
     color: black;
+    border: none;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+    box-shadow: 0 2px 8px 0 rgba(0,0,0,0.08);
+}
+
+.agrega_un_exercici button:hover,
+.agrega_un_exercici button:focus {
+    background-color: #ffc107;
+    color: #222;
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 4px 16px 0 rgba(0,0,0,0.18);
+}
+
+.exercici-item.active {
+    border: 2px solid #ffc107;
+    background: #343a40 !important;
+    box-shadow: 0 0 8px #ffc10788;
+    cursor: pointer;
+}
+.exercici-item {
+    cursor: pointer;
 }

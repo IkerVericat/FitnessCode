@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Guardar codi Github
 
 Avans de modificar el codi realitzar un "git pull origin main" ⚠️‼️
@@ -6,6 +7,15 @@ git status
 git add .  |  git add nom_arxiu
 git commit -m "comentari"
 git push
+
+recuperar versió anterior ------------------------------
+
+--veure checkouts (versions anteriors)--
+git reflog
+
+--recuperar la versió anterior--------------------------
+git checkout 364c394f67193a9337b330c72fe6b5770be15e0c <-- versió anterior
+
 
 # Com he estructurat aquest programa
 
@@ -42,3 +52,4 @@ Defineix la classe Usuari
 /utils/csv_utils.py
 Funcions per guardar i carregar rutines/progressos des de fitxers CSV.
 (guardar_entrenament, carregar_entrenaments, etc)
+=======
