@@ -39,19 +39,17 @@
                     </span>
                 </div>
                 <!-- Dreta: Botó Registrar entrenament -->
-                <div style="min-width:160px;" class="text-end ">
-                    <a href="{{ url_for('registrar_entrenament', idx=idx) }}">
-                        <button class="btn btn-sm btn-warning" type="submit" id="finalitzarBtn" {% if not algunaDada %}disabled{% endif %}>
-                            Finalitzar Rutina
-                        </button>
-                    </a>
+                <div style="min-width:160px;" class="text-end">
+                    <button class="btn btn-warning btn-sm" type="submit" id="finalitzarBtn" form="form_entrenament">
+                        Finalitzar Rutina
+                    </button>
                 </div>
             </div>
         </nav>
 
         <div class="container mt-4">
             <h2 class="mb-4">{{ rutina.titol }}</h2>
-            <form method="post">
+            <form method="post" id="form_entrenament">
                 {% for exercici in rutina.exercicis %}
                     {% set i = loop.index0 %}
                     <div class="card mb-4" style="background-color:rgba(243, 243, 243, 0.56);">

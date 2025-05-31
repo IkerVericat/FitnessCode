@@ -13,9 +13,8 @@ from models.cardio import Cardio
 from models.usuari import Usuari
 from utils.csv_utils import editar_rutina_csv, eliminar_entrenament_csv, guardar_entrenament, carregar_entrenaments, carregar_exercicis, eliminar_rutina_csv
 
-
 app = Flask(__name__)
-
+app.secret_key = 'daw2025'
 
 # --- Rutes Flask ---
 
@@ -27,8 +26,8 @@ def index():
             reader = csv.DictReader(f)
             for row in reader:
                 rutines.append({
-                    'titol': row['titol'],
-                    'exercicis': json.loads(row['exercicis'])
+                    'titol': row.get('titol', 'Sense títol'),
+                    'exercicis': json.loads(row.get('exercicis', '[]'))
                 })
     return render_template('index.html', rutines=rutines, exercicis=carregar_exercicis())
 
@@ -81,8 +80,8 @@ def detall_rutina(idx):
             reader = csv.DictReader(f)
             for row in reader:
                 rutines.append({
-                    'titol': row['titol'],
-                    'exercicis': json.loads(row['exercicis'])
+                    'titol': row.get('titol', 'Sense títol'),
+                    'exercicis': json.loads(row.get('exercicis', '[]'))
                 })
     rutina = rutines[idx]
     return render_template('rutina.html', rutina=rutina, idx=idx)
@@ -94,17 +93,24 @@ def editar_rutina(idx):
         return redirect(url_for('index'))
     rutina = rutines[idx]
     if request.method == 'POST':
-        nou_titol = request.form['titol']
+        nou_titol = request.form.get('titol', '').strip()
+        if not nou_titol:
+            nou_titol = 'Sense títol'
         rutina['titol'] = nou_titol
+        rutines[idx] = rutina
+
+        # Abans de guardar, assegura't que totes tenen titol
+        for r in rutines:
+            if 'titol' not in r or not r['titol']:
+                r['titol'] = 'Sense títol'
 
         # Actualitza les sèries
         for i, exercici in enumerate(rutina['exercicis']):
             for j, serie in enumerate(exercici['series']):
                 kg = request.form.get(f'kg_{i}_{j}', serie['kg'])
                 reps = request.form.get(f'reps_{i}_{j}', serie['reps'])
-                # Solució: converteix només si no és buit, si no posa 0
-                serie['kg'] = int(kg) if kg.strip() != '' else 0
-                serie['reps'] = int(reps) if reps.strip() != '' else 0
+                serie['kg'] = int(kg) if str(kg).strip() != '' else 0
+                serie['reps'] = int(reps) if str(reps).strip() != '' else 0
 
         rutines[idx] = rutina
         # Guarda totes les rutines al CSV
@@ -112,7 +118,9 @@ def editar_rutina(idx):
             writer = csv.DictWriter(f, fieldnames=['titol', 'exercicis'])
             writer.writeheader()
             for r in rutines:
-                writer.writerow({'titol': r['titol'], 'exercicis': json.dumps(r['exercicis'])})
+                titol = r.get('titol', 'Sense títol')
+                exercicis = r.get('exercicis', [])
+                writer.writerow({'titol': titol, 'exercicis': json.dumps(exercicis)})
         return redirect(url_for('detall_rutina', idx=idx))
     return render_template('editar_rutina.html', rutina=rutina, idx=idx)
 
@@ -138,56 +146,82 @@ def registrar_entrenament(idx):
                     'reps': reps,
                     'completada': completada
                 })
-                # ACTUALITZA la rutina amb els nous valors
                 rutina['exercicis'][i]['series'][j]['kg'] = kg
                 rutina['exercicis'][i]['series'][j]['reps'] = reps
             realitzades.append(ex_realitzat)
         # Desa les dades a progressos.csv
+        titol = rutina.get('titol', 'Sense títol')
         with open('data/progressos.csv', 'a', encoding='utf-8', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow([idx, rutina['titol'], json.dumps(realitzades)])
+            writer.writerow([idx, titol, json.dumps(realitzades)])
         # Desa la rutina actualitzada a rutines.csv
         rutines[idx] = rutina
         with open('data/rutines.csv', 'w', encoding='utf-8', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=['titol', 'exercicis'])
             writer.writeheader()
             for r in rutines:
-                writer.writerow({'titol': r['titol'], 'exercicis': json.dumps(r['exercicis'])})
+                titol = r.get('titol', 'Sense títol')
+                exercicis = r.get('exercicis', [])
+                writer.writerow({'titol': titol, 'exercicis': json.dumps(exercicis)})
         session['ultim_entrenament'] = realitzades
         return redirect(url_for('progressos'))
     return render_template('entrenament.html', rutina=rutina, idx=idx)
 
 @app.route('/progressos')
 def progressos():
-    dades = session.get('ultim_entrenament', [])
+    progressos = []
+    with open('data/progressos.csv', encoding='utf-8') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            try:
+                idx, titol, realitzades = row
+                realitzades = json.loads(realitzades)
+                data = {'rutina': titol, 'exercicis': realitzades}
+                progressos.append(data)
+            except Exception:
+                continue
+
+    # Exemple: mostra l'evolució del primer exercici de la primera rutina
+    dates = []
+    pesos = []
+    if progressos:
+        for i, prog in enumerate(progressos):
+            if prog['exercicis']:
+                ex = prog['exercicis'][0]  # Primer exercici
+                pes = 0
+                for s in ex['series']:
+                    try:
+                        pes = max(pes, float(s['kg']) if s['kg'] else 0)
+                    except:
+                        pass
+                pesos.append(pes)
+                dates.append(f"Entrenament {i+1}")
+
+    # Genera la gràfica
     fig, ax = plt.subplots(figsize=(7, 4))
-    if dades:
-        noms = [ex['nom'] for ex in dades]
-        totals = [sum(int(s['kg']) if s['kg'] else 0 for s in ex['series']) for ex in dades]
-        bars = ax.bar(noms, totals, color='#ffc107', edgecolor='#222')
-        ax.set_title('Kg totals per exercici', fontsize=15, color='#ffc107', pad=15)
-        ax.set_xlabel('Exercici', fontsize=12)
-        ax.set_ylabel('Kg totals', fontsize=12)
+    if pesos:
+        ax.plot(dates, pesos, marker='o', color='#ffc107')
+        ax.set_title('Evolució del pes màxim (primer exercici)', color='#ffc107')
+        ax.set_xlabel('Sessió')
+        ax.set_ylabel('Kg')
         ax.set_facecolor('#222')
         fig.patch.set_facecolor('#181818')
         ax.tick_params(colors='#fff')
         ax.spines['bottom'].set_color('#ffc107')
         ax.spines['left'].set_color('#ffc107')
-        for bar in bars:
-            height = bar.get_height()
-            ax.annotate(f'{height}', xy=(bar.get_x() + bar.get_width() / 2, height),
-                        xytext=(0, 3), textcoords="offset points",
-                        ha='center', va='bottom', color='#fff', fontsize=10)
     else:
         ax.text(0.5, 0.5, 'Encara no hi ha dades!', ha='center', va='center', color='#fff', fontsize=16)
         ax.axis('off')
         fig.patch.set_facecolor('#181818')
+
     buf = io.BytesIO()
     plt.tight_layout()
     plt.savefig(buf, format='png', transparent=True)
     buf.seek(0)
     img_base64 = base64.b64encode(buf.read()).decode('utf-8')
     plt.close(fig)
+
+    # Passa també la taula de progressos si vols
     return render_template('progressos.html', img_base64=img_base64, usuari=usuari, progressos=usuari.progressos)
 
 @app.route('/afegir_progres', methods=['POST'])
