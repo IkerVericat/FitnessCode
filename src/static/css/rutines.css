@@ -52,6 +52,10 @@ body {
     margin-bottom: 70px; /* Espacio para la navbar inferior */
 }
 
+.pb-navbar {
+    padding-bottom: 90px; /* ajusta segons l'alçada del teu navbar inferior */
+}
+
 @media (max-width: 850px) {
     .mobile-frame {
         max-width: 100vw;
@@ -61,75 +65,7 @@ body {
     }
 }
 
-
-#titol::placeholder {
-    color: #cccccc;
-    opacity: 1;
-    font-size: 1.5rem;
-}
-#titol {
-    border-left: none !important;
-    border-right: none !important;
-    border-top: 2px solid #222 !important;
-    border-bottom: 2px solid #222 !important;
-    border-radius: 0 !important;
-    background-color: #181818 !important;
-    color: #fff !important;
-    font-size: 1.5rem;
-}
-
-.agrega_un_exercici {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;   /* Centra verticalment */
-    align-items: center;       /* Centra horitzontalment */
-    min-height: 45vh;          /* Ajusta segons el que necessitis */
-    width: 100%;
-}
-
-.agrega_un_exercici > div {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.agrega_un_exercici h2 {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #8c8b8b;
-    font-weight: 400;
-    letter-spacing: 1px;
-    margin-top: 0;
-    margin-bottom: 0;
-    padding: 5px 0;
-}
-
-.agrega_un_exercici button {
-    margin-top: 30px;
-    background-color: #ffc107;
-    color: black;
-    border: none;
-    transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
-    box-shadow: 0 2px 8px 0 rgba(0,0,0,0.08);
-}
-
-.agrega_un_exercici button:hover,
-.agrega_un_exercici button:focus {
-    background-color: #ffc107;
-    color: #222;
-    transform: translateY(-2px) scale(1.04);
-    box-shadow: 0 4px 16px 0 rgba(0,0,0,0.18);
-}
-
-.exercici-item.active {
-    border: 2px solid #ffc107;
-    background: #343a40 !important;
-    box-shadow: 0 0 8px #ffc10788;
-    cursor: pointer;
-}
-.exercici-item {
-    cursor: pointer;
+.dropdown-menu {
+    z-index: 1050;
+    position: absolute;
 }

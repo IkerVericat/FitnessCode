@@ -80,7 +80,7 @@ def detall_rutina(idx):
                     'exercicis': json.loads(row['exercicis'])
                 })
     rutina = rutines[idx]
-    return render_template('rutina.html', rutina=rutina)
+    return render_template('rutina.html', rutina=rutina, idx=idx)
 
 @app.route('/editar_rutina/<int:idx>', methods=['GET', 'POST'])
 def editar_rutina(idx):
@@ -88,11 +88,57 @@ def editar_rutina(idx):
     if idx < 0 or idx >= len(rutines):
         return redirect(url_for('index'))
     rutina = rutines[idx]
-    # print(rutina)  # <-- comprova què arriba aquí!
     if request.method == 'POST':
-        # ...guardar canvis...
-        pass
+        nou_titol = request.form['titol']
+        rutina['titol'] = nou_titol
+
+        # Actualitza les sèries
+        for i, exercici in enumerate(rutina['exercicis']):
+            for j, serie in enumerate(exercici['series']):
+                kg = request.form.get(f'kg_{i}_{j}', serie['kg'])
+                reps = request.form.get(f'reps_{i}_{j}', serie['reps'])
+                serie['kg'] = int(kg)
+                serie['reps'] = int(reps)
+
+        rutines[idx] = rutina
+        # Guarda totes les rutines al CSV
+        with open('data/rutines.csv', 'w', encoding='utf-8', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=['titol', 'exercicis'])
+            writer.writeheader()
+            for r in rutines:
+                writer.writerow({'titol': r['titol'], 'exercicis': json.dumps(r['exercicis'])})
+        return redirect(url_for('detall_rutina', idx=idx))
     return render_template('editar_rutina.html', rutina=rutina, idx=idx)
+
+
+@app.route('/registrar_entrenament/<int:idx>', methods=['GET', 'POST'])
+def registrar_entrenament(idx):
+    rutines = carregar_entrenaments()
+    if idx < 0 or idx >= len(rutines):
+        return redirect(url_for('index'))
+    rutina = rutines[idx]
+    if request.method == 'POST':
+        # Recull els valors realitzats
+        realitzades = []
+        for i, exercici in enumerate(rutina['exercicis']):
+            ex_realitzat = {'nom': exercici['nom'], 'series': []}
+            for j, serie in enumerate(exercici['series']):
+                kg = request.form.get(f'kg_{i}_{j}', '')
+                reps = request.form.get(f'reps_{i}_{j}', '')
+                completada = request.form.get(f'completada_{i}_{j}') == 'on'
+                ex_realitzat['series'].append({
+                    'kg': kg,
+                    'reps': reps,
+                    'completada': completada
+                })
+            realitzades.append(ex_realitzat)
+        # Desa les dades a progressos.csv
+        with open('data/progressos.csv', 'a', encoding='utf-8', newline='') as f:
+            writer = csv.writer(f)
+            # Format: idx, titol rutina, exercicis (json)
+            writer.writerow([idx, rutina['titol'], json.dumps(realitzades)])
+        return redirect(url_for('index'))
+    return render_template('entrenament.html', rutina=rutina, idx=idx)
 
 
 # --- Usuari i els seus progresos ---

@@ -38,10 +38,16 @@
                         Rutina
                     </span>
                 </div>
+                <!-- Dreta: Botó Registrar entrenament -->
+                <div style="min-width:160px;" class="text-end">
+                    <a href="{{ url_for('registrar_entrenament', idx=idx) }}">
+                        <button class="btn btn-warning">Iniciar entrenament</button>
+                    </a>
+                </div>
             </div>
         </nav>
 
-        <div class="container mt-4 mb-5 flex-grow-1" style="margin-bottom: 120px;">
+        <div class="container mt-4 mb-5 flex-grow-1" style="margin-bottom: 120px; padding-bottom: 90px;">
             <h2 class="mb-4">{{ rutina.titol }}</h2>
 
             <!-- Gràfica de la rutina -->
@@ -50,25 +56,21 @@
             <!-- Llista d'exercicis -->
             <div id="detallExercicis" class="mt-4 mb-4">
                 {% for exercici in rutina.exercicis %}
-                    <div class="card bg-secondary text-white mb-3 p-2 d-flex flex-row align-items-center">
+                    <div class="card bg-dark text-white mb-3 p-3 d-flex flex-row align-items-center shadow-lg rounded">
                         <img src="{{ url_for('static', filename='images/' ~ exercici.imatge) if exercici.imatge else url_for('static', filename='images/barbell.png') }}"
-                             style="width:60px; height:60px; object-fit:contain; background:#222; border-radius:8px; margin-right:16px;">
-                        <div>
-                            <div class="fw-bold">{{ exercici.nom }}</div>
-                            <div class="small text-warning">{{ exercici.muscul }}</div>
-                            <ul class="mb-0 series-list">
+                            style="width:80px; height:80px; object-fit:contain; background:#333; border-radius:10px; margin-right:20px;">
+                        <div class="flex-grow-1">
+                            <div class="fw-bold fs-5">{{ exercici.nom }}</div>
+                            <div class="small text-primary">{{ exercici.muscul }}</div>
+                            <ul class="list-unstyled mb-0 mt-2 series-list">
                                 {% for serie in exercici.series %}
                                     <li class="d-flex align-items-center mb-1">
-                                        Sèrie {{ loop.index }}:
-                                        <input type="number" class="form-control form-control-sm mx-1" style="width:70px;" value="{{ serie.kg }}" placeholder="Kg">
-                                        kg,
-                                        <input type="number" class="form-control form-control-sm mx-1" style="width:70px;" value="{{ serie.reps }}" placeholder="Reps">
-                                        reps
-                                        <button type="button" class="btn btn-danger btn-sm ms-2 btn-eliminar-serie">🗑️</button>
+                                        <span class="badge bg-primary text-white p-2">Sèrie {{ loop.index }}</span>
+                                        <span class="mx-2 text-white">{{ serie.kg }} kg</span>
+                                        <span class="mx-2 text-white">{{ serie.reps }} reps</span>
                                     </li>
                                 {% endfor %}
                             </ul>
-                            <button type="button" class="btn btn-outline-warning btn-sm mt-1 btn-afegir-serie">Afegir sèrie</button>
                         </div>
                     </div>
                 {% endfor %}
@@ -120,31 +122,6 @@
                 }]
             },
             options: { plugins: { legend: { display: false } } }
-        });
-
-        // Afegir/eliminar sèries
-        document.querySelectorAll('.btn-afegir-serie').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const ul = this.previousElementSibling;
-                const idx = ul.children.length + 1;
-                const li = document.createElement('li');
-                li.className = "d-flex align-items-center mb-1";
-                li.innerHTML = `Sèrie ${idx}: 
-                    <input type="number" class="form-control form-control-sm mx-1" style="width:70px;" placeholder="Kg">
-                    kg,
-                    <input type="number" class="form-control form-control-sm mx-1" style="width:70px;" placeholder="Reps">
-                    reps
-                    <button type="button" class="btn btn-danger btn-sm ms-2 btn-eliminar-serie">🗑️</button>`;
-                ul.appendChild(li);
-                li.querySelector('.btn-eliminar-serie').onclick = function() {
-                    li.remove();
-                };
-            });
-        });
-        document.querySelectorAll('.btn-eliminar-serie').forEach(btn => {
-            btn.addEventListener('click', function() {
-                this.parentElement.remove();
-            });
         });
     });
     </script>

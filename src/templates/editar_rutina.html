@@ -55,34 +55,36 @@
                        placeholder="Títol de la Rutina"
                        value="{{ rutina.titol }}"
                        required>
-            </form>
 
-            <!-- Llista d'exercicis -->
-            <div id="detallExercicis" class="mt-4 mb-4">
-                {% for exercici in rutina.exercicis %}
-                    <div class="card bg-secondary text-white mb-3 p-2 d-flex flex-row align-items-center">
-                        <img src="{{ url_for('static', filename='images/' ~ exercici.imatge) if exercici.imatge else url_for('static', filename='images/barbell.png') }}"
-                             style="width:60px; height:60px; object-fit:contain; background:#222; border-radius:8px; margin-right:16px;">
-                        <div>
-                            <div class="fw-bold">{{ exercici.nom }}</div>
-                            <div class="small text-warning">{{ exercici.muscul }}</div>
-                            <ul class="mb-0 series-list">
-                                {% for serie in exercici.series %}
-                                    <li class="d-flex align-items-center mb-1">
-                                        Sèrie {{ loop.index }}:
-                                        <input type="number" class="form-control form-control-sm mx-1" style="width:70px;" value="{{ serie.kg }}" placeholder="Kg">
-                                        kg,
-                                        <input type="number" class="form-control form-control-sm mx-1" style="width:70px;" value="{{ serie.reps }}" placeholder="Reps">
-                                        reps
-                                        <button type="button" class="btn btn-danger btn-sm ms-2 btn-eliminar-serie">🗑️</button>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                            <button type="button" class="btn btn-outline-warning btn-sm mt-1 btn-afegir-serie">Afegir sèrie</button>
+                <!-- Llista d'exercicis -->
+                <div id="detallExercicis" class="mt-4 mb-4">
+                    {% for exercici in rutina.exercicis %}
+                        {% set i = loop.index0 %}
+                        <div class="card bg-secondary text-white mb-3 p-2 d-flex flex-row align-items-center">
+                            <img src="{{ url_for('static', filename='images/' ~ exercici.imatge) if exercici.imatge else url_for('static', filename='images/barbell.png') }}"
+                                 style="width:60px; height:60px; object-fit:contain; background:#222; border-radius:8px; margin-right:16px;">
+                            <div>
+                                <div class="fw-bold">{{ exercici.nom }}</div>
+                                <div class="small text-warning">{{ exercici.muscul }}</div>
+                                <ul class="mb-0 series-list">
+                                    {% for serie in exercici.series %}
+                                        {% set j = loop.index0 %}
+                                        <li class="d-flex align-items-center mb-1">
+                                            Sèrie {{ loop.index }}:
+                                            <input type="number" name="kg_{{ i }}_{{ j }}" class="form-control form-control-sm mx-1" style="width:70px;" value="{{ serie.kg }}" placeholder="Kg">
+                                            kg,
+                                            <input type="number" name="reps_{{ i }}_{{ j }}" class="form-control form-control-sm mx-1" style="width:70px;" value="{{ serie.reps }}" placeholder="Reps">
+                                            reps
+                                            <button type="button" class="btn btn-danger btn-sm ms-2 btn-eliminar-serie">🗑️</button>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                                <button type="button" class="btn btn-outline-warning btn-sm mt-1 btn-afegir-serie">Afegir sèrie</button>
+                            </div>
                         </div>
-                    </div>
-                {% endfor %}
-            </div>
+                    {% endfor %}
+                </div>
+            </form>
         </div>
 
         <!-- Navbar inferior -->
