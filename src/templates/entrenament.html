@@ -1,39 +1,121 @@
-<!-- filepath: h:\Assignatures\Programació\FitnessCode\src\templates\registrar_entrenament.html -->
 <!DOCTYPE html>
-<html lang="ca">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Registrar Entrenament</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitnessCode</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/entrenament.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        html, body {
+            height: 100%;
+            background: #181818 !important;
+        }
+        body {
+            color: #fff;
+            min-height: 100vh;
+        }
+    </style>
 </head>
-<body class="bg-dark text-white">
-<div class="container mt-4">
-    <h2 class="mb-4">{{ rutina.titol }}</h2>
-    <form method="post">
-        {% for exercici in rutina.exercicis %}
-            {% set i = loop.index0 %}
-            <div class="card bg-secondary mb-3">
-                <div class="card-body">
-                    <h5>{{ exercici.nom }}</h5>
-                    <ul class="mb-0">
-                        {% for serie in exercici.series %}
-                            {% set j = loop.index0 %}
-                            <li class="mb-2">
-                                Sèrie {{ j+1 }}:
-                                <input type="number" name="kg_{{ i }}_{{ j }}" placeholder="Kg" class="form-control d-inline w-auto mx-1" style="width:80px;">
-                                kg,
-                                <input type="number" name="reps_{{ i }}_{{ j }}" placeholder="Reps" class="form-control d-inline w-auto mx-1" style="width:80px;">
-                                reps
-                                <input type="checkbox" name="completada_{{ i }}_{{ j }}" class="form-check-input ms-2">
-                                <label class="form-check-label ms-1">Completada</label>
-                            </li>
-                        {% endfor %}
-                    </ul>
+<body>
+    <div class="mobile-frame d-flex flex-column" style="position:relative; min-height:100vh;">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark w-100">
+            <div class="container-fluid d-flex align-items-center">
+                <!-- Esquerra -->
+                <div style="min-width:80px;" class="text-end">
+                    <a class="nav-link d-inline p-0" href="{{ url_for('index') }}">
+                        <button class="btn btn-lg" type="button">
+                            ⬅️
+                        </button>
+                    </a>
+                </div>
+                <!-- Centre -->
+                <div class="flex-grow-1 text-center">
+                    <span class="navbar-brand fw-light" style="font-size:1.2rem;">
+                        Entrenament
+                    </span>
+                </div>
+                <!-- Dreta: Botó Registrar entrenament -->
+                <div style="min-width:160px;" class="text-end ">
+                    <a href="{{ url_for('registrar_entrenament', idx=idx) }}">
+                        <button class="btn btn-sm btn-warning">Finalitzar Rutina</button>
+                    </a>
                 </div>
             </div>
-        {% endfor %}
-        <button type="submit" class="btn btn-success">Guardar entrenament</button>
-    </form>
-</div>
+        </nav>
+
+        <div class="container mt-4">
+            <h2 class="mb-4">{{ rutina.titol }}</h2>
+            <form method="post">
+                {% for exercici in rutina.exercicis %}
+                    {% set i = loop.index0 %}
+                    <div class="card mb-4" style="background-color:rgba(243, 243, 243, 0.56);">
+                        <div class="card-body">
+                            <!-- Imatge i nom de l'exercici -->
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="{{ url_for('static', filename='images/' ~ exercici.imatge) if exercici.imatge else url_for('static', filename='images/barbell.png') }}"
+                                     style="width:70px; height:70px; object-fit:contain; background:#222; border-radius:10px; margin-right:18px;">
+                                <div>
+                                    <h5 class="mb-0">{{ exercici.nom }}</h5>
+                                    <div class="small text-warning">{{ exercici.muscul }}</div>
+                                </div>
+                            </div>
+                            <!-- Capçalera de la taula -->
+                            <div class="row fw-bold text-center mb-2">
+                                <div class="col-3">Sèrie</div>
+                                <div class="col-3">Kg</div>
+                                <div class="col-3">Reps</div>
+                                <div class="col-3">✔️</div>
+                            </div>
+                            <!-- Dades de cada sèrie -->
+                            {% for serie in exercici.series %}
+                                {% set j = loop.index0 %}
+                                <div class="row align-items-center mb-2 text-center">
+                                    <div class="col-3">S{{ j+1 }}</div>
+                                    <div class="col-3">
+                                        <input type="number"
+                                               name="kg_{{ i }}_{{ j }}"
+                                               placeholder="{{ serie.kg }}"
+                                               class="form-control form-control-sm text-center"
+                                               style="width:80px; margin:auto;">
+                                    </div>
+                                    <div class="col-3">
+                                        <input type="number"
+                                               name="reps_{{ i }}_{{ j }}"
+                                               placeholder="{{ serie.reps }}"
+                                               class="form-control form-control-sm text-center"
+                                               style="width:80px; margin:auto;">
+                                    </div>
+                                    <div class="col-3">
+                                        <input type="checkbox" name="completada_{{ i }}_{{ j }}" class="form-check-input">
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-warning">Guardar entrenament</button>
+            </form>
+        </div>
+
+        <!-- Navbar inferior -->
+        <nav class="navbar navbar-dark bg-dark navbar-expand navbar-bottom mt-4"
+             style="position:absolute; bottom:0; left:0; width:100%; border-radius:0 0 24px 24px;">
+            <div class="container-fluid d-flex justify-content-around">
+                <a href="{{ url_for('veure_progressos') }}" class="text-light text-center flex-fill py-2 text-decoration-none">
+                    <i class="bi bi-house-fill" style="font-size: 1.4em;"></i><br>Inici
+                </a>
+                <a href="{{ url_for('index') }}" class="text-light text-center flex-fill py-2 text-decoration-none">
+                    <i class="fas fa-dumbbell" style="font-size: 1.3em;"></i><br>Entrenament
+                </a>
+            </div>
+        </nav>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
 </body>
 </html>
