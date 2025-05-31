@@ -41,14 +41,14 @@
             </div>
         </nav>
 
-        <div class="container mt-4 mb-5 flex-grow-1">
+        <div class="container mt-4 mb-5 flex-grow-1" style="margin-bottom: 120px;">
             <h2 class="text-center mb-4">{{ rutina.titol }}</h2>
 
             <!-- Gràfica de la rutina -->
             <canvas id="graficaRutina" height="120"></canvas>
 
             <!-- Llista d'exercicis -->
-            <div id="detallExercicis" class="mt-4">
+            <div id="detallExercicis" class="mt-4 mb-4">
                 {% for exercici in rutina.exercicis %}
                     <div class="card bg-secondary text-white mb-3 p-2 d-flex flex-row align-items-center">
                         <img src="{{ url_for('static', filename='images/' ~ exercici.imatge) if exercici.imatge else url_for('static', filename='images/barbell.png') }}"
@@ -76,7 +76,7 @@
         </div>
 
         <!-- Navbar inferior -->
-        <nav class="navbar navbar-dark bg-dark navbar-expand navbar-bottom"
+        <nav class="navbar navbar-dark bg-dark navbar-expand navbar-bottom mt-4"
              style="position:absolute; bottom:0; left:0; width:100%; border-radius:0 0 24px 24px;">
             <div class="container-fluid d-flex justify-content-around">
                 <a href="{{ url_for('veure_progressos') }}" class="text-light text-center flex-fill py-2 text-decoration-none">

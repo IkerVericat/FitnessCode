@@ -82,7 +82,10 @@
                                             <a class="dropdown-item" href="#">Editar</a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item text-danger" href="#">Eliminar</a>
+                                            <form method="post" action="{{ url_for('eliminar_rutina') }}" style="display:inline;">
+                                                <input type="hidden" name="titol" value="{{ rutina.titol }}">
+                                                <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Segur que vols eliminar aquesta rutina?')">Eliminar</button>
+                                            </form>
                                         </li>
                                     </ul>
                                 </div>

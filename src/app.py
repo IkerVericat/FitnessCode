@@ -6,7 +6,7 @@ from models.entrenaments import Entrenament
 from models.forca import Forca
 from models.cardio import Cardio
 from models.usuari import Usuari
-from utils.csv_utils import guardar_entrenament, carregar_entrenaments, carregar_exercicis
+from utils.csv_utils import eliminar_entrenament_csv, guardar_entrenament, carregar_entrenaments, carregar_exercicis, eliminar_rutina_csv
 
 
 app = Flask(__name__)
@@ -103,6 +103,19 @@ def afegir_progres():
 def veure_progressos():
     return render_template('progressos.html', progressos=usuari.progressos, usuari=usuari)
 
+@app.route('/eliminar_entrenament', methods=['POST'])
+def eliminar_entrenament():
+    data = request.form['data']
+    rutina = request.form['rutina']
+    exercici = request.form['exercici']
+    eliminar_entrenament_csv(data, rutina, exercici)
+    return redirect(url_for('progresos'))
+
+@app.route('/eliminar_rutina', methods=['POST'])
+def eliminar_rutina():
+    titol = request.form['titol']
+    eliminar_rutina_csv(titol)
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':
