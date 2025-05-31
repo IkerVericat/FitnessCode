@@ -2,7 +2,7 @@ class Usuari:
     def __init__(self, nom, email):
         self.nom = nom
         self.email = email
-        self.progressos = []  # Llista de progressos (pots carregar-los del CSV)
+        self.progressos = []
         
 
     def to_dict(self):

@@ -102,8 +102,9 @@ def editar_rutina(idx):
             for j, serie in enumerate(exercici['series']):
                 kg = request.form.get(f'kg_{i}_{j}', serie['kg'])
                 reps = request.form.get(f'reps_{i}_{j}', serie['reps'])
-                serie['kg'] = int(kg)
-                serie['reps'] = int(reps)
+                # Solució: converteix només si no és buit, si no posa 0
+                serie['kg'] = int(kg) if kg.strip() != '' else 0
+                serie['reps'] = int(reps) if reps.strip() != '' else 0
 
         rutines[idx] = rutina
         # Guarda totes les rutines al CSV
@@ -125,7 +126,6 @@ def registrar_entrenament(idx):
         return redirect(url_for('index'))
     rutina = rutines[idx]
     if request.method == 'POST':
-        # Recull els valors realitzats
         realitzades = []
         for i, exercici in enumerate(rutina['exercicis']):
             ex_realitzat = {'nom': exercici['nom'], 'series': []}
@@ -138,41 +138,57 @@ def registrar_entrenament(idx):
                     'reps': reps,
                     'completada': completada
                 })
+                # ACTUALITZA la rutina amb els nous valors
+                rutina['exercicis'][i]['series'][j]['kg'] = kg
+                rutina['exercicis'][i]['series'][j]['reps'] = reps
             realitzades.append(ex_realitzat)
         # Desa les dades a progressos.csv
         with open('data/progressos.csv', 'a', encoding='utf-8', newline='') as f:
             writer = csv.writer(f)
-            # Format: idx, titol rutina, exercicis (json)
             writer.writerow([idx, rutina['titol'], json.dumps(realitzades)])
-        # També pots guardar a la sessió si vols mostrar la gràfica immediatament
+        # Desa la rutina actualitzada a rutines.csv
+        rutines[idx] = rutina
+        with open('data/rutines.csv', 'w', encoding='utf-8', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=['titol', 'exercicis'])
+            writer.writeheader()
+            for r in rutines:
+                writer.writerow({'titol': r['titol'], 'exercicis': json.dumps(r['exercicis'])})
         session['ultim_entrenament'] = realitzades
         return redirect(url_for('progressos'))
     return render_template('entrenament.html', rutina=rutina, idx=idx)
 
 @app.route('/progressos')
 def progressos():
-    # Recupera les dades de l'últim entrenament de la sessió (opcional)
     dades = session.get('ultim_entrenament', [])
-    # Genera la gràfica amb matplotlib (exemple simple)
-    fig, ax = plt.subplots()
-    # Exemple: suma de kg per sèrie de l'últim entrenament
+    fig, ax = plt.subplots(figsize=(7, 4))
     if dades:
+        noms = [ex['nom'] for ex in dades]
         totals = [sum(int(s['kg']) if s['kg'] else 0 for s in ex['series']) for ex in dades]
-        ax.plot(range(1, len(totals)+1), totals, marker='o')
-        ax.set_title('Progrés de força')
-        ax.set_xlabel('Exercici')
-        ax.set_ylabel('Kg totals')
+        bars = ax.bar(noms, totals, color='#ffc107', edgecolor='#222')
+        ax.set_title('Kg totals per exercici', fontsize=15, color='#ffc107', pad=15)
+        ax.set_xlabel('Exercici', fontsize=12)
+        ax.set_ylabel('Kg totals', fontsize=12)
+        ax.set_facecolor('#222')
+        fig.patch.set_facecolor('#181818')
+        ax.tick_params(colors='#fff')
+        ax.spines['bottom'].set_color('#ffc107')
+        ax.spines['left'].set_color('#ffc107')
+        for bar in bars:
+            height = bar.get_height()
+            ax.annotate(f'{height}', xy=(bar.get_x() + bar.get_width() / 2, height),
+                        xytext=(0, 3), textcoords="offset points",
+                        ha='center', va='bottom', color='#fff', fontsize=10)
     else:
-        ax.plot([1, 2, 3], [10, 12, 15], marker='o')
-        ax.set_title('Progrés de força')
-        ax.set_xlabel('Sessió')
-        ax.set_ylabel('Kg totals')
+        ax.text(0.5, 0.5, 'Encara no hi ha dades!', ha='center', va='center', color='#fff', fontsize=16)
+        ax.axis('off')
+        fig.patch.set_facecolor('#181818')
     buf = io.BytesIO()
-    plt.savefig(buf, format='png')
+    plt.tight_layout()
+    plt.savefig(buf, format='png', transparent=True)
     buf.seek(0)
     img_base64 = base64.b64encode(buf.read()).decode('utf-8')
     plt.close(fig)
-    return render_template('progressos.html', img_base64=img_base64, progressos=usuari.progressos, usuari=usuari)
+    return render_template('progressos.html', img_base64=img_base64, usuari=usuari, progressos=usuari.progressos)
 
 @app.route('/afegir_progres', methods=['POST'])
 def afegir_progres():
