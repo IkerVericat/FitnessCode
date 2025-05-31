@@ -99,9 +99,9 @@ def afegir_progres():
     usuari.guardar_progressos_csv('data/progresos_usuari.csv')
     return redirect(url_for('index'))
 
-@app.route('/progresos')
-def veure_progresos():
-    return render_template('progresos.html', progressos=usuari.progressos, usuari=usuari)
+@app.route('/progressos')
+def veure_progressos():
+    return render_template('progressos.html', progressos=usuari.progressos, usuari=usuari)
 
 
 
