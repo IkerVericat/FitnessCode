@@ -79,7 +79,7 @@
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end">
                                         <li>
-                                            <a class="dropdown-item" href="#">Editar</a>
+                                            <a class="dropdown-item" href="{{ url_for('editar_rutina', idx=loop.index0) }}">Editar</a>
                                         </li>
                                         <li>
                                             <form method="post" action="{{ url_for('eliminar_rutina') }}" style="display:inline;">

@@ -124,3 +124,28 @@ def eliminar_rutina_csv(titol):
             writer = csv.DictWriter(f, fieldnames=rutines[0].keys())
             writer.writeheader()
             writer.writerows(rutines)
+
+def editar_rutina_csv(titol_original, nova_rutina):
+    """
+    titol_original: títol de la rutina a modificar (clau primària)
+    nova_rutina: diccionari amb les dades noves (ha de tenir les mateixes claus que les altres rutines)
+    """
+    if not os.path.isfile(CSV_FILE):
+        return False
+    rutines = []
+    updated = False
+    with open(CSV_FILE, 'r', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            if row.get('titol') == titol_original:
+                rutines.append(nova_rutina)
+                updated = True
+            else:
+                rutines.append(row)
+    if updated:
+        with open(CSV_FILE, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=nova_rutina.keys())
+            writer.writeheader()
+            writer.writerows(rutines)
+        return True
+    return False

@@ -6,7 +6,7 @@ from models.entrenaments import Entrenament
 from models.forca import Forca
 from models.cardio import Cardio
 from models.usuari import Usuari
-from utils.csv_utils import eliminar_entrenament_csv, guardar_entrenament, carregar_entrenaments, carregar_exercicis, eliminar_rutina_csv
+from utils.csv_utils import editar_rutina_csv, eliminar_entrenament_csv, guardar_entrenament, carregar_entrenaments, carregar_exercicis, eliminar_rutina_csv
 
 
 app = Flask(__name__)
@@ -82,6 +82,17 @@ def detall_rutina(idx):
     rutina = rutines[idx]
     return render_template('rutina.html', rutina=rutina)
 
+@app.route('/editar_rutina/<int:idx>', methods=['GET', 'POST'])
+def editar_rutina(idx):
+    rutines = carregar_entrenaments()
+    if idx < 0 or idx >= len(rutines):
+        return redirect(url_for('index'))
+    rutina = rutines[idx]
+    # print(rutina)  # <-- comprova què arriba aquí!
+    if request.method == 'POST':
+        # ...guardar canvis...
+        pass
+    return render_template('editar_rutina.html', rutina=rutina, idx=idx)
 
 
 # --- Usuari i els seus progresos ---
