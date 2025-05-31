@@ -41,7 +41,9 @@
                 <!-- Dreta: Botó Registrar entrenament -->
                 <div style="min-width:160px;" class="text-end ">
                     <a href="{{ url_for('registrar_entrenament', idx=idx) }}">
-                        <button class="btn btn-sm btn-warning">Finalitzar Rutina</button>
+                        <button class="btn btn-sm btn-warning" type="submit" id="finalitzarBtn" {% if not algunaDada %}disabled{% endif %}>
+                            Finalitzar Rutina
+                        </button>
                     </a>
                 </div>
             </div>
@@ -105,7 +107,7 @@
         <nav class="navbar navbar-dark bg-dark navbar-expand navbar-bottom mt-4"
              style="position:absolute; bottom:0; left:0; width:100%; border-radius:0 0 24px 24px;">
             <div class="container-fluid d-flex justify-content-around">
-                <a href="{{ url_for('veure_progressos') }}" class="text-light text-center flex-fill py-2 text-decoration-none">
+                <a href="{{ url_for('progressos') }}" class="text-light text-center flex-fill py-2 text-decoration-none">
                     <i class="bi bi-house-fill" style="font-size: 1.4em;"></i><br>Inici
                 </a>
                 <a href="{{ url_for('index') }}" class="text-light text-center flex-fill py-2 text-decoration-none">
@@ -116,6 +118,33 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const finalitzarBtn = document.querySelector('.btn-warning.btn-sm');
+    function comprovaDades() {
+        let algunaDada = false;
+        form.querySelectorAll('input[type="number"], input[type="checkbox"]').forEach(input => {
+            if (
+                (input.type === "number" && input.value.trim() !== "") ||
+                (input.type === "checkbox" && input.checked)
+            ) {
+                algunaDada = true;
+            }
+        });
+        finalitzarBtn.disabled = !algunaDada;
+        if (algunaDada) {
+            finalitzarBtn.classList.remove('btn-secondary');
+            finalitzarBtn.classList.add('btn-warning');
+        } else {
+            finalitzarBtn.classList.remove('btn-warning');
+            finalitzarBtn.classList.add('btn-secondary');
+        }
+    }
+    form.addEventListener('input', comprovaDades);
+    comprovaDades();
+});
+</script>
     
 </body>
 </html>

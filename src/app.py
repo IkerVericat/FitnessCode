@@ -1,7 +1,12 @@
 import json
 import csv
 import os
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import io
+import base64
 from models.entrenaments import Entrenament
 from models.forca import Forca
 from models.cardio import Cardio
@@ -111,6 +116,8 @@ def editar_rutina(idx):
     return render_template('editar_rutina.html', rutina=rutina, idx=idx)
 
 
+usuari = Usuari("Iker", "ikervericat@iesmontsia.org")
+
 @app.route('/registrar_entrenament/<int:idx>', methods=['GET', 'POST'])
 def registrar_entrenament(idx):
     rutines = carregar_entrenaments()
@@ -137,13 +144,35 @@ def registrar_entrenament(idx):
             writer = csv.writer(f)
             # Format: idx, titol rutina, exercicis (json)
             writer.writerow([idx, rutina['titol'], json.dumps(realitzades)])
-        return redirect(url_for('index'))
+        # També pots guardar a la sessió si vols mostrar la gràfica immediatament
+        session['ultim_entrenament'] = realitzades
+        return redirect(url_for('progressos'))
     return render_template('entrenament.html', rutina=rutina, idx=idx)
 
-
-# --- Usuari i els seus progresos ---
-
-usuari = Usuari("Iker", "ikervericat@iesmontsia.org")
+@app.route('/progressos')
+def progressos():
+    # Recupera les dades de l'últim entrenament de la sessió (opcional)
+    dades = session.get('ultim_entrenament', [])
+    # Genera la gràfica amb matplotlib (exemple simple)
+    fig, ax = plt.subplots()
+    # Exemple: suma de kg per sèrie de l'últim entrenament
+    if dades:
+        totals = [sum(int(s['kg']) if s['kg'] else 0 for s in ex['series']) for ex in dades]
+        ax.plot(range(1, len(totals)+1), totals, marker='o')
+        ax.set_title('Progrés de força')
+        ax.set_xlabel('Exercici')
+        ax.set_ylabel('Kg totals')
+    else:
+        ax.plot([1, 2, 3], [10, 12, 15], marker='o')
+        ax.set_title('Progrés de força')
+        ax.set_xlabel('Sessió')
+        ax.set_ylabel('Kg totals')
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    img_base64 = base64.b64encode(buf.read()).decode('utf-8')
+    plt.close(fig)
+    return render_template('progressos.html', img_base64=img_base64, progressos=usuari.progressos, usuari=usuari)
 
 @app.route('/afegir_progres', methods=['POST'])
 def afegir_progres():
@@ -156,17 +185,13 @@ def afegir_progres():
     usuari.guardar_progressos_csv('data/progresos_usuari.csv')
     return redirect(url_for('index'))
 
-@app.route('/progressos')
-def veure_progressos():
-    return render_template('progressos.html', progressos=usuari.progressos, usuari=usuari)
-
 @app.route('/eliminar_entrenament', methods=['POST'])
 def eliminar_entrenament():
     data = request.form['data']
     rutina = request.form['rutina']
     exercici = request.form['exercici']
     eliminar_entrenament_csv(data, rutina, exercici)
-    return redirect(url_for('progresos'))
+    return redirect(url_for('progressos'))
 
 @app.route('/eliminar_rutina', methods=['POST'])
 def eliminar_rutina():
