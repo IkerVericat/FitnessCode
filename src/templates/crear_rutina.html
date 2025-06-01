@@ -21,7 +21,7 @@
     </style>
 </head>
 <body>
-    <div class="mobile-frame d-flex flex-column" style="position:relative; min-height:100vh; padding-bottom:90px;">
+    <div class="mobile-frame d-flex flex-column" style="position:relative; min-height:100vh; padding-bottom:100px;">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark w-100">
             <div class="container-fluid justify-content-between">
                 <!-- Esquerra: Cancel·lar -->
@@ -29,7 +29,7 @@
                     Cancel·lar
                 </a>
                 <!-- Centre: Títol -->
-                <span class="navbar-brand mx-auto fw-light" style="font-size:1.2rem;">
+                <span class="navbar-brand mx-auto fw-light" style="font-size:1.5rem;">
                     Crear Rutina
                 </span>
                 <!-- Dreta: Guardar -->
@@ -67,16 +67,15 @@
             </div>
         </form>
 
-
-        <!-- Navbar inferior fijado dentro del mobile-frame -->
+        <!-- Navbar inferior -->
         <nav class="navbar navbar-dark bg-dark navbar-expand navbar-bottom"
-             style="position:fixed; bottom:0; left:0; width:100%; border-radius:0 0 24px 24px; z-index:1050;">
+             style="position:absolute; bottom:0; left:0; width:100%; border-radius:0 0 24px 24px; z-index:1050;">
             <div class="container-fluid d-flex justify-content-around">
                 <a href="{{ url_for('progressos') }}" class="text-light text-center flex-fill py-2 text-decoration-none">
                     <i class="bi bi-house-fill" style="font-size: 1.4em;"></i><br>Inici
                 </a>
                 <a href="{{ url_for('index') }}" class="text-light text-center flex-fill py-2 text-decoration-none">
-                    <i class="fas fa-dumbbell" style="font-size: 1.3em;"></i><br>Entrenament
+                    <i class="fas fa-dumbbell" style="font-size: 1.4em;"></i><br>Entrenament
                 </a>
             </div>
         </nav>

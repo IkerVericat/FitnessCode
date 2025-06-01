@@ -12,6 +12,9 @@ from models.forca import Forca
 from models.cardio import Cardio
 from models.usuari import Usuari
 from utils.csv_utils import editar_rutina_csv, eliminar_entrenament_csv, guardar_entrenament, carregar_entrenaments, carregar_exercicis, eliminar_rutina_csv
+from datetime import datetime
+
+
 
 app = Flask(__name__)
 app.secret_key = 'daw2025'
@@ -141,14 +144,12 @@ def registrar_entrenament(idx):
                     'reps': reps,
                     'completada': completada
                 })
-                rutina['exercicis'][i]['series'][j]['kg'] = kg
-                rutina['exercicis'][i]['series'][j]['reps'] = reps
             realitzades.append(ex_realitzat)
-        # Desa les dades a progressos.csv
         titol = rutina.get('titol', 'Sense títol')
+        data_hora = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         with open('data/progressos.csv', 'a', encoding='utf-8', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow([idx, titol, json.dumps(realitzades)])
+            writer.writerow([data_hora, titol, json.dumps(realitzades)])
         # Desa la rutina actualitzada a rutines.csv
         rutines[idx] = rutina
         with open('data/rutines.csv', 'w', encoding='utf-8', newline='') as f:
@@ -164,45 +165,52 @@ def registrar_entrenament(idx):
 
 @app.route('/progressos')
 def progressos():
-    import matplotlib
-    matplotlib.use('Agg')
-    import matplotlib.pyplot as plt
-    import io, base64, csv, json
-
+    import csv, json
     progressos = []
     with open('data/progressos.csv', encoding='utf-8') as f:
         reader = csv.reader(f)
         for row in reader:
             try:
-                idx, titol, realitzades = row
+                data_hora, titol, realitzades = row
                 realitzades = json.loads(realitzades)
-                data = {'rutina': titol, 'exercicis': realitzades}
-                progressos.append(data)
+                for ex in realitzades:
+                    for serie in ex['series']:
+                        progressos.append({
+                            'data': data_hora,
+                            'rutina': titol,
+                            'exercici': ex['nom'],
+                            'kg': serie.get('kg', ''),
+                            'reps': serie.get('reps', '')
+                        })
+            except Exception:
+                continue
+    # Agrupa per rutina per a les gràfiques
+    rutines_grafiques = {}
+    with open('data/progressos.csv', encoding='utf-8') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            try:
+                data_hora, titol, realitzades = row
+                realitzades = json.loads(realitzades)
+                if titol not in rutines_grafiques:
+                    rutines_grafiques[titol] = []
+                if realitzades:
+                    ex = realitzades[0]
+                    pes = 0
+                    for s in ex['series']:
+                        try:
+                            pes = max(pes, float(s['kg']) if s['kg'] else 0)
+                        except:
+                            pass
+                    rutines_grafiques[titol].append(pes)
             except Exception:
                 continue
 
-    # Agrupa per rutina només si hi ha dades
-    rutines_grafiques = {}
-    for prog in progressos:
-        rutina = prog['rutina']
-        if rutina not in rutines_grafiques:
-            rutines_grafiques[rutina] = []
-        # Agafa el pes màxim del primer exercici
-        if prog['exercicis']:
-            ex = prog['exercicis'][0]
-            pes = 0
-            for s in ex['series']:
-                try:
-                    pes = max(pes, float(s['kg']) if s['kg'] else 0)
-                except:
-                    pass
-            rutines_grafiques[rutina].append(pes)
-
-    # Només crea gràfiques per rutines amb dades
+    # Genera una gràfica per cada rutina amb dades
     grafiques = {}
     for rutina, pesos in rutines_grafiques.items():
         if not pesos:
-            continue  # No generis gràfica si no hi ha dades
+            continue
         fig, ax = plt.subplots(figsize=(6, 3))
         ax.plot(range(1, len(pesos)+1), pesos, marker='o', color='#ffc107')
         ax.set_title(f'Evolució {rutina}', color='#ffc107')
@@ -221,7 +229,7 @@ def progressos():
         plt.close(fig)
         grafiques[rutina] = img_base64
 
-    return render_template('progressos.html', grafiques=grafiques, usuari=usuari, progressos=usuari.progressos)
+    return render_template('progressos.html', progressos=progressos, grafiques=grafiques, usuari=usuari)
 
 @app.route('/afegir_progres', methods=['POST'])
 def afegir_progres():
