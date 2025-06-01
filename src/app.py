@@ -1,7 +1,7 @@
 import json
 import csv
 import os
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -89,8 +89,8 @@ def crear_rutina():
     return render_template('crear_rutina.html', exercicis=exercicis)
 
 
-@app.route('/rutina/<int:idx>')
-def detall_rutina(idx):
+@app.route('/rutina/<int:idx>', endpoint='rutina')
+def mostrar_rutina(idx):
     rutines = []
     if os.path.isfile('data/rutines.csv'):
         with open('data/rutines.csv', 'r', encoding='utf-8') as f:
@@ -133,7 +133,7 @@ def editar_rutina(idx):
                 titol = r['titol'] if 'titol' in r and r['titol'] else 'Sense títol'
                 exercicis = r['exercicis'] if 'exercicis' in r else []
                 writer.writerow({'titol': titol, 'exercicis': json.dumps(exercicis)})
-        return redirect(url_for('detall_rutina', idx=idx))
+        return redirect(url_for('mostrar_rutina', idx=idx))
     return render_template('editar_rutina.html', rutina=rutina, idx=idx)
 
 
@@ -289,6 +289,55 @@ def eliminar_rutina():
     titol = request.form['titol']
     eliminar_rutina_csv(titol)
     return redirect(url_for('index'))
+
+@app.route('/pujar_media/<int:idx>/<int:exercici>', methods=['POST'])
+def pujar_media(idx, exercici):
+    rutina = carregar_rutina(idx)
+    fitxer = request.files.get('media')
+    if fitxer and fitxer.filename:
+        nom_fitxer = f"{rutina['titol']}_{exercici}_{fitxer.filename}"
+        ruta = os.path.join('static', 'media', nom_fitxer)
+        fitxer.save(ruta)
+        if 'media' not in rutina['exercicis'][exercici]:
+            rutina['exercicis'][exercici]['media'] = []
+        rutina['exercicis'][exercici]['media'].append(nom_fitxer)
+        # Desa la rutina actualitzada
+        # Carrega totes les rutines
+        rutines = []
+        if os.path.isfile('data/rutines.csv'):
+            with open('data/rutines.csv', 'r', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    rutines.append({
+                        'titol': row.get('titol', 'Sense títol'),
+                        'exercicis': json.loads(row.get('exercicis', '[]'))
+                    })
+        # Actualitza la rutina corresponent
+        rutines[idx] = rutina
+        with open('data/rutines.csv', 'w', encoding='utf-8', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=['titol', 'exercicis'])
+            writer.writeheader()
+            for r in rutines:
+                writer.writerow({'titol': r['titol'], 'exercicis': json.dumps(r['exercicis'])})
+        flash('Fitxer pujat correctament!', 'success')
+    else:
+        flash('No s\'ha seleccionat cap fitxer.', 'danger')
+    return redirect(url_for('rutina', idx=idx))
+
+
+def carregar_rutina(idx):
+    rutines = []
+    if os.path.isfile('data/rutines.csv'):
+        with open('data/rutines.csv', 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                rutines.append({
+                    'titol': row.get('titol', 'Sense títol'),
+                    'exercicis': json.loads(row.get('exercicis', '[]'))
+                })
+    if idx < 0 or idx >= len(rutines):
+        return None
+    return rutines[idx]
 
 
 if __name__ == '__main__':

@@ -89,6 +89,28 @@
                                     {% endfor %}
                                 </ul>
                             {% endif %}
+
+                            <!-- Secció per pujar imatges o vídeos -->
+                            <form action="{{ url_for('pujar_media', idx=idx, exercici=loop.index0) }}" method="post" enctype="multipart/form-data" class="mt-3">
+                                <label class="form-label">Afegeix imatge o vídeo:</label>
+                                <input type="file" name="media" accept="image/*,video/*" class="form-control mb-2">
+                                <button type="submit" class="btn btn-sm btn-outline-info">Pujar</button>
+                            </form>
+
+                            {% if exercici.media %}
+                                <div class="mt-2 d-flex align-items-center flex-wrap gap-3">
+                                    {% for fitxer in exercici.media %}
+                                        {% if fitxer.endswith('.mp4') or fitxer.endswith('.webm') %}
+                                            <video controls width="140" class="mb-2 rounded" style="background:#222;">
+                                                <source src="{{ url_for('static', filename='media/' ~ fitxer) }}">
+                                                El teu navegador no suporta vídeo.
+                                            </video>
+                                        {% else %}
+                                            <img src="{{ url_for('static', filename='media/' ~ fitxer) }}" alt="media" width="120" class="mb-2 me-2 rounded" style="background:#222;">
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 {% endfor %}
