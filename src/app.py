@@ -137,7 +137,7 @@ def editar_rutina(idx):
     return render_template('editar_rutina.html', rutina=rutina, idx=idx)
 
 
-usuari = Usuari("Iker", "ikervericat@iesmontsia.org")
+usuari = Usuari("Senyor/a", "señor@exemple.org")
 
 @app.route('/registrar_entrenament/<int:idx>', methods=['GET', 'POST'])
 def registrar_entrenament(idx):
