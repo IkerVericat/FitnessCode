@@ -60,7 +60,18 @@
         </table>
 
         <h2>Els teus progressos</h2>
-        <img src="data:image/png;base64,{{ img_base64 }}" alt="Gràfica de progressos" class="img-fluid">
+        {% if grafiques %}
+            {% for rutina, img in grafiques.items() %}
+                <div class="mb-4">
+                    <h5 class="text-warning">{{ rutina }}</h5>
+                    <img src="data:image/png;base64,{{ img }}" alt="Gràfica de {{ rutina }}" class="img-fluid">
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-warning text-center mt-4">
+                Encara no hi ha dades registrades per mostrar gràfiques.
+            </div>
+        {% endif %}
 
         <!-- Navbar inferior fijado dentro del mobile-frame -->
         <nav class="navbar navbar-dark bg-dark navbar-expand navbar-bottom"

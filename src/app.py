@@ -97,29 +97,24 @@ def editar_rutina(idx):
         if not nou_titol:
             nou_titol = 'Sense títol'
         rutina['titol'] = nou_titol
-        rutines[idx] = rutina
 
-        # Abans de guardar, assegura't que totes tenen titol
-        for r in rutines:
-            if 'titol' not in r or not r['titol']:
-                r['titol'] = 'Sense títol'
-
-        # Actualitza les sèries
+        # Actualitza les sèries de la rutina editada
         for i, exercici in enumerate(rutina['exercicis']):
             for j, serie in enumerate(exercici['series']):
-                kg = request.form.get(f'kg_{i}_{j}', serie['kg'])
-                reps = request.form.get(f'reps_{i}_{j}', serie['reps'])
+                kg = request.form.get(f'kg_{i}_{j}', serie.get('kg', 0))
+                reps = request.form.get(f'reps_{i}_{j}', serie.get('reps', 0))
                 serie['kg'] = int(kg) if str(kg).strip() != '' else 0
                 serie['reps'] = int(reps) if str(reps).strip() != '' else 0
 
         rutines[idx] = rutina
-        # Guarda totes les rutines al CSV
+
+        # Guarda totes les rutines al CSV sense perdre els títols
         with open('data/rutines.csv', 'w', encoding='utf-8', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=['titol', 'exercicis'])
             writer.writeheader()
             for r in rutines:
-                titol = r.get('titol', 'Sense títol')
-                exercicis = r.get('exercicis', [])
+                titol = r['titol'] if 'titol' in r and r['titol'] else 'Sense títol'
+                exercicis = r['exercicis'] if 'exercicis' in r else []
                 writer.writerow({'titol': titol, 'exercicis': json.dumps(exercicis)})
         return redirect(url_for('detall_rutina', idx=idx))
     return render_template('editar_rutina.html', rutina=rutina, idx=idx)
@@ -169,6 +164,11 @@ def registrar_entrenament(idx):
 
 @app.route('/progressos')
 def progressos():
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    import io, base64, csv, json
+
     progressos = []
     with open('data/progressos.csv', encoding='utf-8') as f:
         reader = csv.reader(f)
@@ -181,27 +181,31 @@ def progressos():
             except Exception:
                 continue
 
-    # Exemple: mostra l'evolució del primer exercici de la primera rutina
-    dates = []
-    pesos = []
-    if progressos:
-        for i, prog in enumerate(progressos):
-            if prog['exercicis']:
-                ex = prog['exercicis'][0]  # Primer exercici
-                pes = 0
-                for s in ex['series']:
-                    try:
-                        pes = max(pes, float(s['kg']) if s['kg'] else 0)
-                    except:
-                        pass
-                pesos.append(pes)
-                dates.append(f"Entrenament {i+1}")
+    # Agrupa per rutina només si hi ha dades
+    rutines_grafiques = {}
+    for prog in progressos:
+        rutina = prog['rutina']
+        if rutina not in rutines_grafiques:
+            rutines_grafiques[rutina] = []
+        # Agafa el pes màxim del primer exercici
+        if prog['exercicis']:
+            ex = prog['exercicis'][0]
+            pes = 0
+            for s in ex['series']:
+                try:
+                    pes = max(pes, float(s['kg']) if s['kg'] else 0)
+                except:
+                    pass
+            rutines_grafiques[rutina].append(pes)
 
-    # Genera la gràfica
-    fig, ax = plt.subplots(figsize=(7, 4))
-    if pesos:
-        ax.plot(dates, pesos, marker='o', color='#ffc107')
-        ax.set_title('Evolució del pes màxim (primer exercici)', color='#ffc107')
+    # Només crea gràfiques per rutines amb dades
+    grafiques = {}
+    for rutina, pesos in rutines_grafiques.items():
+        if not pesos:
+            continue  # No generis gràfica si no hi ha dades
+        fig, ax = plt.subplots(figsize=(6, 3))
+        ax.plot(range(1, len(pesos)+1), pesos, marker='o', color='#ffc107')
+        ax.set_title(f'Evolució {rutina}', color='#ffc107')
         ax.set_xlabel('Sessió')
         ax.set_ylabel('Kg')
         ax.set_facecolor('#222')
@@ -209,20 +213,15 @@ def progressos():
         ax.tick_params(colors='#fff')
         ax.spines['bottom'].set_color('#ffc107')
         ax.spines['left'].set_color('#ffc107')
-    else:
-        ax.text(0.5, 0.5, 'Encara no hi ha dades!', ha='center', va='center', color='#fff', fontsize=16)
-        ax.axis('off')
-        fig.patch.set_facecolor('#181818')
+        buf = io.BytesIO()
+        plt.tight_layout()
+        plt.savefig(buf, format='png', transparent=True)
+        buf.seek(0)
+        img_base64 = base64.b64encode(buf.read()).decode('utf-8')
+        plt.close(fig)
+        grafiques[rutina] = img_base64
 
-    buf = io.BytesIO()
-    plt.tight_layout()
-    plt.savefig(buf, format='png', transparent=True)
-    buf.seek(0)
-    img_base64 = base64.b64encode(buf.read()).decode('utf-8')
-    plt.close(fig)
-
-    # Passa també la taula de progressos si vols
-    return render_template('progressos.html', img_base64=img_base64, usuari=usuari, progressos=usuari.progressos)
+    return render_template('progressos.html', grafiques=grafiques, usuari=usuari, progressos=usuari.progressos)
 
 @app.route('/afegir_progres', methods=['POST'])
 def afegir_progres():

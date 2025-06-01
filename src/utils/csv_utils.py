@@ -15,25 +15,16 @@ def guardar_entrenament(entrenament):
         writer.writerow(entrenament.to_dict())
 
 def carregar_entrenaments():
-    entrenaments = []
-    if not os.path.isfile(CSV_FILE):
-        return entrenaments
-    with open(CSV_FILE, 'r', encoding='utf-8') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            tipus = row.get('tipus', '')
-            nom = row.get('nom', '')
-            descripcio = row.get('descripcio', '')
-            exercicis = json.loads(row.get('exercicis', '[]'))
-            if tipus == 'Cardio':
-                distancia = row.get('distancia_km', '')
-                entrenaments.append({'tipus': 'Cardio', 'nom': nom, 'descripcio': descripcio, 'exercicis': exercicis, 'distancia_km': distancia})
-            elif tipus == 'Forca':
-                pes = row.get('pes_kg', '')
-                entrenaments.append({'tipus': 'Forca', 'nom': nom, 'descripcio': descripcio, 'exercicis': exercicis, 'pes_kg': pes})
-            else:
-                entrenaments.append({'tipus': tipus, 'nom': nom, 'descripcio': descripcio, 'exercicis': exercicis})
-    return entrenaments
+    rutines = []
+    if os.path.isfile('data/rutines.csv'):
+        with open('data/rutines.csv', 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                rutines.append({
+                    'titol': row.get('titol', 'Sense títol'),
+                    'exercicis': json.loads(row.get('exercicis', '[]'))
+                })
+    return rutines
 
 def carregar_exercicis():
     exercicis = []
@@ -60,7 +51,7 @@ def afegir_exercici_a_rutina(nom_rutina, exercici):
         for row in reader:
             # Carrega la llista d'exercicis
             exercicis = json.loads(row.get('exercicis', '[]'))
-            if row.get('nom') == nom_rutina:
+            if row.get('titol') == nom_rutina:  # <-- aquí estava 'nom', ha de ser 'titol'
                 exercicis.append(exercici)
                 row['exercicis'] = json.dumps(exercicis)
                 updated = True
