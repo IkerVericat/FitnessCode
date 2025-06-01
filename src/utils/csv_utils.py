@@ -20,11 +20,21 @@ def carregar_entrenaments():
         with open('data/rutines.csv', 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
+                exercicis = json.loads(row.get('exercicis', '[]'))
+                
+                # 🔒 Completa imatges si cal
+                exercicis_totals = carregar_exercicis()
+                for e in exercicis:
+                    if 'imatge' not in e:
+                        trobat = next((ex for ex in exercicis_totals if ex['nom'] == e['nom']), None)
+                        e['imatge'] = trobat['imatge'] if trobat else 'barbell.png'
+
                 rutines.append({
                     'titol': row.get('titol', 'Sense títol'),
-                    'exercicis': json.loads(row.get('exercicis', '[]'))
+                    'exercicis': exercicis
                 })
     return rutines
+
 
 def carregar_exercicis():
     exercicis = []
@@ -34,14 +44,31 @@ def carregar_exercicis():
     with open(EXERCICIS_FILE, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
-            exercicis.append(row)
+            exercici = {
+                'nom': row['nom'],
+                'muscul': row['muscul'],
+                'imatge': row.get('imatge', 'barbell.png')
+            }
+            exercicis.append(exercici)
     return exercicis
+
+
 
 def afegir_exercici_a_rutina(nom_rutina, exercici):
     """
     Afegeix un exercici (diccionari) a la rutina amb nom 'nom_rutina'.
     L'exercici s'afegeix a la llista d'exercicis de la rutina al fitxer rutines.csv.
     """
+    # 💡 Comprova si falta la imatge, i l’afegeix buscant-la
+    if 'imatge' not in exercici:
+        exercicis_totals = carregar_exercicis()
+        for e in exercicis_totals:
+            if e['nom'] == exercici['nom']:
+                exercici['imatge'] = e.get('imatge', 'barbell.png')
+                break
+        else:
+            exercici['imatge'] = 'barbell.png'  # Per defecte si no trobat
+
     rutines = []
     updated = False
 
@@ -51,7 +78,7 @@ def afegir_exercici_a_rutina(nom_rutina, exercici):
         for row in reader:
             # Carrega la llista d'exercicis
             exercicis = json.loads(row.get('exercicis', '[]'))
-            if row.get('titol') == nom_rutina:  # <-- aquí estava 'nom', ha de ser 'titol'
+            if row.get('titol') == nom_rutina:
                 exercicis.append(exercici)
                 row['exercicis'] = json.dumps(exercicis)
                 updated = True
@@ -65,6 +92,7 @@ def afegir_exercici_a_rutina(nom_rutina, exercici):
             writer.writerows(rutines)
         return True
     return False
+
 
 def afegir_progres(progres):
     os.makedirs('data', exist_ok=True)

@@ -56,8 +56,9 @@
                         <div class="card-body">
                             <!-- Imatge i nom de l'exercici -->
                             <div class="d-flex align-items-center mb-3">
-                                <img src="{{ url_for('static', filename='images/' ~ exercici.imatge) if exercici.imatge else url_for('static', filename='images/barbell.png') }}"
-                                     style="width:70px; height:70px; object-fit:contain; background:#222; border-radius:10px; margin-right:18px;">
+                                <img src="{{ url_for('static', filename='images/' ~ exercici['imatge']) if exercici['imatge'] else url_for('static', filename='images/barbell.png') }}"
+                                    alt="{{ exercici['nom'] }}"
+                                    style="width:80px; height:80px; object-fit:contain; background:#333; border-radius:10px; margin-right:20px;">
                                 <div>
                                     <h5 class="mb-0">{{ exercici.nom }}</h5>
                                     <div class="small text-warning">{{ exercici.muscul }}</div>

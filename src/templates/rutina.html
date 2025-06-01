@@ -53,12 +53,18 @@
             <!-- Gràfica de la rutina -->
             <canvas id="graficaRutina" height="120"></canvas>
 
+
+
             <!-- Llista d'exercicis -->
             <div id="detallExercicis" class="mt-4 mb-4">
                 {% for exercici in rutina.exercicis %}
                     <div class="card bg-dark text-white mb-3 p-3 d-flex flex-row align-items-center shadow-lg rounded">
-                        <img src="{{ url_for('static', filename='images/' ~ exercici.imatge) if exercici.imatge else url_for('static', filename='images/barbell.png') }}"
+                        <img src="{{ url_for('static', filename='images/' ~ exercici['imatge']) if exercici['imatge'] else url_for('static', filename='images/barbell.png') }}"
+                            alt="{{ exercici['nom'] }}"
                             style="width:80px; height:80px; object-fit:contain; background:#333; border-radius:10px; margin-right:20px;">
+
+
+
                         <div class="flex-grow-1">
                             <div class="fw-bold fs-5">{{ exercici.nom }}</div>
                             <div class="small text-primary">{{ exercici.muscul }}</div>
