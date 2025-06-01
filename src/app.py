@@ -62,17 +62,31 @@ def entrenaments():
 
 @app.route('/crear_rutina', methods=['GET', 'POST'])
 def crear_rutina():
+    exercicis = carregar_exercicis()
     if request.method == 'POST':
-        titol = request.form['titol']
-        exercicis = json.loads(request.form['exercicis'])
+        titol = request.form.get('titol', '').strip()
+        exercicis_json = request.form.get('exercicis', '[]')
+        try:
+            exercicis_llista = json.loads(exercicis_json)
+        except Exception:
+            exercicis_llista = []
+        if not titol:
+            titol = 'Sense títol'
         # Desa la rutina al CSV
-        with open('data/rutines.csv', 'a', encoding='utf-8', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=['titol', 'exercicis'])
-            if f.tell() == 0:
+        if os.path.isfile('data/rutines.csv'):
+            mode = 'a'
+            write_header = False
+        else:
+            mode = 'w'
+            write_header = True
+        with open('data/rutines.csv', mode, encoding='utf-8', newline='') as f:
+            fieldnames = ['titol', 'exercicis']
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            if write_header:
                 writer.writeheader()
-            writer.writerow({'titol': titol, 'exercicis': json.dumps(exercicis)})
+            writer.writerow({'titol': titol, 'exercicis': json.dumps(exercicis_llista)})
         return redirect(url_for('index'))
-    return render_template('crear_rutina.html', exercicis=carregar_exercicis())
+    return render_template('crear_rutina.html', exercicis=exercicis)
 
 
 @app.route('/rutina/<int:idx>')
@@ -134,17 +148,28 @@ def registrar_entrenament(idx):
     if request.method == 'POST':
         realitzades = []
         for i, exercici in enumerate(rutina['exercicis']):
-            ex_realitzat = {'nom': exercici['nom'], 'series': []}
-            for j, serie in enumerate(exercici['series']):
-                kg = request.form.get(f'kg_{i}_{j}', '')
-                reps = request.form.get(f'reps_{i}_{j}', '')
-                completada = request.form.get(f'completada_{i}_{j}') == 'on'
-                ex_realitzat['series'].append({
-                    'kg': kg,
-                    'reps': reps,
-                    'completada': completada
+            if exercici.get('muscul') == 'cardiovascular':
+                distancia_km = request.form.get(f'distancia_km_{i}', '')
+                temps_minuts = request.form.get(f'temps_minuts_{i}', '')
+                realitzades.append({
+                    'nom': exercici['nom'],
+                    'muscul': exercici['muscul'],
+                    'imatge': exercici.get('imatge', ''),
+                    'distancia_km': distancia_km,
+                    'temps_minuts': temps_minuts
                 })
-            realitzades.append(ex_realitzat)
+            else:
+                ex_realitzat = {'nom': exercici['nom'], 'series': []}
+                for j, serie in enumerate(exercici.get('series', [])):
+                    kg = request.form.get(f'kg_{i}_{j}', '')
+                    reps = request.form.get(f'reps_{i}_{j}', '')
+                    completada = request.form.get(f'completada_{i}_{j}') == 'on'
+                    ex_realitzat['series'].append({
+                        'kg': kg,
+                        'reps': reps,
+                        'completada': completada
+                    })
+                realitzades.append(ex_realitzat)
         titol = rutina.get('titol', 'Sense títol')
         data_hora = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         with open('data/progressos.csv', 'a', encoding='utf-8', newline='') as f:
@@ -174,14 +199,23 @@ def progressos():
                 data_hora, titol, realitzades = row
                 realitzades = json.loads(realitzades)
                 for ex in realitzades:
-                    for serie in ex['series']:
+                    if ex.get('muscul') == 'cardiovascular':
                         progressos.append({
                             'data': data_hora,
                             'rutina': titol,
                             'exercici': ex['nom'],
-                            'kg': serie.get('kg', ''),
-                            'reps': serie.get('reps', '')
+                            'distancia_km': ex.get('distancia_km', ''),
+                            'temps_minuts': ex.get('temps_minuts', '')
                         })
+                    else:
+                        for serie in ex.get('series', []):
+                            progressos.append({
+                                'data': data_hora,
+                                'rutina': titol,
+                                'exercici': ex['nom'],
+                                'kg': serie.get('kg', ''),
+                                'reps': serie.get('reps', '')
+                            })
             except Exception:
                 continue
     # Agrupa per rutina per a les gràfiques

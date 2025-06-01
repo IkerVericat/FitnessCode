@@ -63,20 +63,32 @@
                             alt="{{ exercici['nom'] }}"
                             style="width:80px; height:80px; object-fit:contain; background:#333; border-radius:10px; margin-right:20px;">
 
-
-
                         <div class="flex-grow-1">
                             <div class="fw-bold fs-5">{{ exercici.nom }}</div>
                             <div class="small text-primary">{{ exercici.muscul }}</div>
-                            <ul class="list-unstyled mb-0 mt-2 series-list">
-                                {% for serie in exercici.series %}
-                                    <li class="d-flex align-items-center mb-1">
-                                        <span class="badge bg-primary text-white p-2">Sèrie {{ loop.index }}</span>
-                                        <span class="mx-2 text-white">{{ serie.kg }} kg</span>
-                                        <span class="mx-2 text-white">{{ serie.reps }} reps</span>
+                            {% if exercici.muscul == 'cardiovascular' %}
+                                <ul class="list-unstyled mb-0 mt-2">
+                                    <li>
+                                        <span class="badge bg-info text-dark p-2">Cardio</span>
+                                        <span class="mx-2 text-white">
+                                            {{ exercici.distancia_km|default('') }} km
+                                        </span>
+                                        <span class="mx-2 text-white">
+                                            {{ exercici.temps_minuts|default('') }} min
+                                        </span>
                                     </li>
-                                {% endfor %}
-                            </ul>
+                                </ul>
+                            {% else %}
+                                <ul class="list-unstyled mb-0 mt-2 series-list">
+                                    {% for serie in exercici.series %}
+                                        <li class="d-flex align-items-center mb-1">
+                                            <span class="badge bg-primary text-white p-2">Sèrie {{ loop.index }}</span>
+                                            <span class="mx-2 text-white">{{ serie.kg }} kg</span>
+                                            <span class="mx-2 text-white">{{ serie.reps }} reps</span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
                         </div>
                     </div>
                 {% endfor %}
@@ -100,7 +112,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Gràfica: suma de kg per exercici
+        // Gràfica: suma de kg per exercici de força
         const labels = [
             {% for exercici in rutina.exercicis %}
                 "{{ exercici.nom }}",
@@ -108,12 +120,16 @@
         ];
         const totals = [
             {% for exercici in rutina.exercicis %}
-                {{
-                    exercici.series | map(attribute='kg')
-                    | map('float')
-                    | sum
-                    | default(0, true)
-                }},
+                {% if exercici.series %}
+                    {{
+                        exercici.series | map(attribute='kg')
+                        | map('float')
+                        | sum
+                        | default(0, true)
+                    }},
+                {% else %}
+                    0,
+                {% endif %}
             {% endfor %}
         ];
         const ctx = document.getElementById('graficaRutina').getContext('2d');
@@ -129,6 +145,38 @@
             },
             options: { plugins: { legend: { display: false } } }
         });
+    });
+
+    // Codi afegit per recollir les dades dels exercicis seleccionats
+    document.querySelectorAll('#exercicisSeleccionats .card').forEach(card => {
+        const nom = card.querySelector('.fw-bold').innerText;
+        const muscul = card.getAttribute('data-muscul');
+        const imatge = card.querySelector('img').getAttribute('src').split('/').pop();
+
+        if (muscul === 'cardiovascular') {
+            const distancia_km = card.querySelector('input[placeholder="Km"]').value;
+            const temps_minuts = card.querySelector('input[placeholder="Minuts"]').value;
+            exercicis.push({
+                nom,
+                muscul,
+                imatge,
+                distancia_km,
+                temps_minuts
+            });
+        } else {
+            const series = [];
+            card.querySelectorAll('.series-container .input-group').forEach(grup => {
+                const kg = grup.querySelector('input[placeholder="Kg"]').value;
+                const reps = grup.querySelector('input[placeholder="Reps"]').value;
+                series.push({kg, reps});
+            });
+            exercicis.push({
+                nom,
+                muscul,
+                imatge,
+                series
+            });
+        }
     });
     </script>
 </body>

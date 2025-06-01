@@ -36,10 +36,26 @@ def carregar_entrenaments():
     return rutines
 
 
+def carregar_rutina(idx):
+    rutines = []
+    if os.path.isfile('data/rutines.csv'):
+        with open('data/rutines.csv', 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                rutines.append({
+                    'titol': row.get('titol', 'Sense títol'),
+                    'exercicis': json.loads(row.get('exercicis', '[]'))
+                })
+    if idx < 0 or idx >= len(rutines):
+        return None
+    return rutines[idx]
+
+
 def carregar_exercicis():
     exercicis = []
     EXERCICIS_FILE = os.path.join('data', 'exercicis.csv')
     if not os.path.isfile(EXERCICIS_FILE):
+        print(f"⚠️ Fitxer {EXERCICIS_FILE} no trobat.")
         return exercicis
     with open(EXERCICIS_FILE, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)

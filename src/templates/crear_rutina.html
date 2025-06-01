@@ -92,20 +92,25 @@
           </div>
           <div class="modal-body">
             <div class="row">
-              {% for exercici in exercicis %}
-                <div class="col-12 col-md-6 mb-3">
-                  <div class="card bg-secondary text-white h-100 flex-row align-items-center p-2 exercici-item"
-                       data-nom="{{ exercici['nom'] }}">
-                    <img src="{{ url_for('static', filename='images/' ~ exercici['imatge']) }}"
-                         alt="{{ exercici['nom'] }}"
-                         style="width:60px; height:60px; object-fit:contain; background:#222; border-radius:8px; margin-right:16px;">
-                    <div>
-                      <div class="fw-bold">{{ exercici['nom'] }}</div>
-                      <div class="small text-warning">{{ exercici['muscul'] }}</div>
+              {% if exercicis %}
+                {% for exercici in exercicis %}
+                    <div class="col-12 col-md-6 mb-3">
+                        <div class="card bg-secondary text-white h-100 flex-row align-items-center p-2 exercici-item"
+                             data-nom="{{ exercici['nom'] }}"
+                             data-muscul="{{ exercici['muscul'] }}">
+                            <img src="{{ url_for('static', filename='images/' ~ exercici['imatge']) }}"
+                                 alt="{{ exercici['nom'] }}"
+                                 style="width:60px; height:60px; object-fit:contain; background:#222; border-radius:8px; margin-right:16px;">
+                            <div>
+                                <div class="fw-bold">{{ exercici['nom'] }}</div>
+                                <div class="small text-warning">{{ exercici['muscul'] }}</div>
+                            </div>
+                        </div>
                     </div>
-                  </div>
-                </div>
-              {% endfor %}
+                {% endfor %}
+              {% else %}
+                  <p>No hi ha exercicis disponibles.</p>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -138,26 +143,46 @@
                 // Busca la targeta original per obtenir la imatge i múscul
                 const card = document.querySelector(`.exercici-item[data-nom="${nom}"]`);
                 const imgSrc = card.querySelector('img').src;
-                zona.innerHTML += `
-                <div class="card bg-dark text-white mb-3">
-                    <div class="card-body d-flex align-items-center">
-                        <img src="${imgSrc}" alt="${nom}" style="width:60px; height:60px; object-fit:contain; background:#222; border-radius:8px; margin-right:16px;">
-                        <div>
-                            <div class="fw-bold">${nom}</div>
-                            <div class="series-container">
-                                <div class="input-group input-group-sm mb-2">
-                                    <span class="input-group-text">Sèrie</span>
-                                    <input type="number" class="form-control" placeholder="Kg">
-                                    <input type="number" class="form-control" placeholder="Reps">
-                                </div>
+                const muscul = card.getAttribute('data-muscul'); // <-- aquí
+
+                let extraFields = '';
+                if (muscul === 'cardiovascular') {
+                    extraFields = `
+                        <div class="input-group input-group-sm mb-2">
+                            <span class="input-group-text">Distància (km)</span>
+                            <input type="number" class="form-control" placeholder="Km">
+                        </div>
+                        <div class="input-group input-group-sm mb-2">
+                            <span class="input-group-text">Temps (minuts)</span>
+                            <input type="number" class="form-control" placeholder="Minuts">
+                        </div>
+                    `;
+                } else {
+                    extraFields = `
+                        <div class="series-container">
+                            <div class="input-group input-group-sm mb-2">
+                                <span class="input-group-text">Sèrie</span>
+                                <input type="number" class="form-control" placeholder="Kg">
+                                <input type="number" class="form-control" placeholder="Reps">
                             </div>
-                            <div class="mt-2 d-flex gap-2">
-                                <button class="btn btn-outline-warning btn-sm add-serie" type="button">Afegir sèrie</button>
-                                <button class="btn btn-outline-danger btn-sm remove-exercici" type="button"><i class="bi bi-trash"></i> Elimina</button>
+                        </div>
+                        <div class="mt-2 d-flex gap-2">
+                            <button class="btn btn-outline-warning btn-sm add-serie" type="button">Afegir sèrie</button>
+                        </div>
+                    `;
+                }
+
+                zona.innerHTML += `
+                    <div class="card bg-dark text-white mb-3">
+                        <div class="card-body d-flex align-items-center">
+                            <img src="${imgSrc}" alt="${nom}" style="width:60px; height:60px; object-fit:contain; background:#222; border-radius:8px; margin-right:16px;">
+                            <div>
+                                <div class="fw-bold">${nom}</div>
+                                ${extraFields}
+                                <button class="btn btn-outline-danger btn-sm remove-exercici mt-2" type="button"><i class="bi bi-trash"></i> Elimina</button>
                             </div>
                         </div>
                     </div>
-                </div>
                 `;
             });
             document.getElementById('missatgeInicial').style.display = 'none';
@@ -192,13 +217,34 @@
             const exercicis = [];
             document.querySelectorAll('#exercicisSeleccionats .card').forEach(card => {
                 const nom = card.querySelector('.fw-bold').innerText;
-                const series = [];
-                card.querySelectorAll('.series-container .input-group').forEach(grup => {
-                    const kg = grup.querySelector('input[placeholder="Kg"]').value;
-                    const reps = grup.querySelector('input[placeholder="Reps"]').value;
-                    series.push({kg, reps});
-                });
-                exercicis.push({nom, series});
+                // Obtenim el múscul des de la targeta original
+                const muscul = document.querySelector(`.exercici-item[data-nom="${nom}"]`).getAttribute('data-muscul');
+                const imatge = card.querySelector('img').getAttribute('src').split('/').pop();
+
+                if (muscul === 'cardiovascular') {
+                    const distancia_km = card.querySelector('input[placeholder="Km"]').value;
+                    const temps_minuts = card.querySelector('input[placeholder="Minuts"]').value;
+                    exercicis.push({
+                        nom,
+                        muscul,
+                        imatge,
+                        distancia_km,
+                        temps_minuts
+                    });
+                } else {
+                    const series = [];
+                    card.querySelectorAll('.series-container .input-group').forEach(grup => {
+                        const kg = grup.querySelector('input[placeholder="Kg"]').value;
+                        const reps = grup.querySelector('input[placeholder="Reps"]').value;
+                        series.push({kg, reps});
+                    });
+                    exercicis.push({
+                        nom,
+                        muscul,
+                        imatge,
+                        series
+                    });
+                }
             });
 
             // Crea un input ocult amb les dades serialitzades

@@ -64,41 +64,53 @@
                                     <div class="small text-warning">{{ exercici.muscul }}</div>
                                 </div>
                             </div>
-                            <!-- Capçalera de la taula -->
-                            <div class="row fw-bold text-center mb-2">
-                                <div class="col-3">Sèrie</div>
-                                <div class="col-3">Kg</div>
-                                <div class="col-3">Reps</div>
-                                <div class="col-3">✔️</div>
-                            </div>
-                            <!-- Dades de cada sèrie -->
-                            {% for serie in exercici.series %}
-                                {% set j = loop.index0 %}
-                                <div class="row align-items-center mb-2 text-center">
-                                    <div class="col-3">S{{ j+1 }}</div>
-                                    <div class="col-3">
-                                        <input type="number"
-                                               name="kg_{{ i }}_{{ j }}"
-                                               placeholder="{{ serie.kg }}"
-                                               class="form-control form-control-sm text-center"
-                                               style="width:80px; margin:auto;">
+                            {% if exercici.muscul == 'cardiovascular' %}
+                                <div class="row mb-2">
+                                    <div class="col-6 text-center">
+                                        <label class="fw-bold">Distància (km)</label>
+                                        <input type="number" step="any" min="0" name="distancia_km_{{ i }}" class="form-control text-center" value="{{ exercici.distancia_km|default('') }}">
                                     </div>
-                                    <div class="col-3">
-                                        <input type="number"
-                                               name="reps_{{ i }}_{{ j }}"
-                                               placeholder="{{ serie.reps }}"
-                                               class="form-control form-control-sm text-center"
-                                               style="width:80px; margin:auto;">
-                                    </div>
-                                    <div class="col-3">
-                                        <input type="checkbox" name="completada_{{ i }}_{{ j }}" class="form-check-input">
+                                    <div class="col-6 text-center">
+                                        <label class="fw-bold">Temps (min)</label>
+                                        <input type="number" min="0" name="temps_minuts_{{ i }}" class="form-control text-center" value="{{ exercici.temps_minuts|default('') }}">
                                     </div>
                                 </div>
-                            {% endfor %}
+                            {% else %}
+                                <!-- Capçalera de la taula -->
+                                <div class="row fw-bold text-center mb-2">
+                                    <div class="col-3">Sèrie</div>
+                                    <div class="col-3">Kg</div>
+                                    <div class="col-3">Reps</div>
+                                    <div class="col-3">✔️</div>
+                                </div>
+                                <!-- Dades de cada sèrie -->
+                                {% for serie in exercici.series %}
+                                    {% set j = loop.index0 %}
+                                    <div class="row align-items-center mb-2 text-center">
+                                        <div class="col-3">S{{ j+1 }}</div>
+                                        <div class="col-3">
+                                            <input type="number"
+                                                   name="kg_{{ i }}_{{ j }}"
+                                                   placeholder="{{ serie.kg }}"
+                                                   class="form-control form-control-sm text-center"
+                                                   style="width:80px; margin:auto;">
+                                        </div>
+                                        <div class="col-3">
+                                            <input type="number"
+                                                   name="reps_{{ i }}_{{ j }}"
+                                                   placeholder="{{ serie.reps }}"
+                                                   class="form-control form-control-sm text-center"
+                                                   style="width:80px; margin:auto;">
+                                        </div>
+                                        <div class="col-3">
+                                            <input type="checkbox" name="completada_{{ i }}_{{ j }}" class="form-check-input">
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
                         </div>
                     </div>
                 {% endfor %}
-                <button type="submit" class="btn btn-warning">Guardar entrenament</button>
             </form>
         </div>
 
