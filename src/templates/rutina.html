@@ -60,7 +60,7 @@
                 {% for exercici in rutina.exercicis %}
                     <div class="card bg-dark text-white mb-3 p-3 d-flex flex-row align-items-center shadow-lg rounded">
                         <img src="{{ url_for('static', filename='images/' ~ exercici['imatge']) if exercici['imatge'] else url_for('static', filename='images/barbell.png') }}"
-                            alt="{{ exercici['nom'] }}"
+                            alt="Exercise {{ exercici['nom'] }} icon representing {{ exercici['muscul'] }} in a fitness routine card, displayed in a dark themed workout tracking interface"
                             style="width:80px; height:80px; object-fit:contain; background:#333; border-radius:10px; margin-right:20px;">
 
                         <div class="flex-grow-1">

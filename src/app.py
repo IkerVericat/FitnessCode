@@ -120,7 +120,7 @@ def editar_rutina(idx):
             for j, serie in enumerate(exercici['series']):
                 kg = request.form.get(f'kg_{i}_{j}', serie.get('kg', 0))
                 reps = request.form.get(f'reps_{i}_{j}', serie.get('reps', 0))
-                serie['kg'] = int(kg) if str(kg).strip() != '' else 0
+                serie['kg'] = float(kg) if str(kg).strip() != '' else 0
                 serie['reps'] = int(reps) if str(reps).strip() != '' else 0
 
         rutines[idx] = rutina
