@@ -28,3 +28,6 @@ class Usuari:
             writer.writeheader()
             for p in self.progressos:
                 writer.writerow(p)
+
+
+                
