@@ -133,7 +133,7 @@ def editar_rutina(idx):
                 titol = r['titol'] if 'titol' in r and r['titol'] else 'Sense títol'
                 exercicis = r['exercicis'] if 'exercicis' in r else []
                 writer.writerow({'titol': titol, 'exercicis': json.dumps(exercicis)})
-        return redirect(url_for('mostrar_rutina', idx=idx))
+        return redirect(url_for('rutina', idx=idx))
     return render_template('editar_rutina.html', rutina=rutina, idx=idx)
 
 
