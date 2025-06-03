@@ -2,9 +2,12 @@ import csv
 import os
 import json
 
+
+# Utils per a gestionar rutines i progressos d'entrenament
 CSV_FILE = os.path.join('data', 'rutines.csv')
 PROGRESSOS_FILE = os.path.join('data', 'progressos.csv')
 
+# Funcions per a gestionar rutines d'entrenament
 def guardar_entrenament(entrenament):
     os.makedirs('data', exist_ok=True)
     file_exists = os.path.isfile(CSV_FILE)
@@ -51,6 +54,7 @@ def carregar_rutina(idx):
     return rutines[idx]
 
 
+# Funcions per a gestionar exercicis
 def carregar_exercicis():
     exercicis = []
     EXERCICIS_FILE = os.path.join('data', 'exercicis.csv')
@@ -110,6 +114,7 @@ def afegir_exercici_a_rutina(nom_rutina, exercici):
     return False
 
 
+# Funcions per a gestionar progressos d'entrenament
 def afegir_progres(progres):
     os.makedirs('data', exist_ok=True)
     file_exists = os.path.isfile(PROGRESSOS_FILE)

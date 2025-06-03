@@ -49,11 +49,11 @@ body {
 
 .container.flex-grow-1 {
     flex-grow: 1;
-    margin-bottom: 70px; /* Espacio para la navbar inferior */
+    margin-bottom: 70px; 
 }
 
 .pb-navbar {
-    padding-bottom: 90px; /* ajusta segons l'alçada del teu navbar inferior */
+    padding-bottom: 90px; 
 }
 
 @media (max-width: 850px) {

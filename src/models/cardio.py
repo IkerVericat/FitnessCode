@@ -1,12 +1,13 @@
 from .entrenaments import Entrenament
 
-
+# Classe Cardio que hereta d'Entrenament
 class Cardio(Entrenament):
     def __init__(self, nom, descripcio, exercicis, distancia_km, temps_minuts):
         super().__init__(nom, descripcio, exercicis)
         self.__distancia_km = distancia_km  # atribut privat
         self.__temps_minuts = temps_minuts  # atribut privat
 
+    # Conversió a diccionari per a guardar en CSV
     def to_dict(self):
         d = super().to_dict()
         d['distancia_km'] = self.__distancia_km

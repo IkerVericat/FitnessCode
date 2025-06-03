@@ -4,6 +4,7 @@ body {
     min-height: 100vh;
 }
 
+
 .mobile-frame {
     max-width: 800px;
     min-height: 100vh;
@@ -49,7 +50,7 @@ body {
 
 .container.flex-grow-1 {
     flex-grow: 1;
-    margin-bottom: 70px; /* Espacio para la navbar inferior */
+    margin-bottom: 70px;
 }
 
 @media (max-width: 850px) {
@@ -67,7 +68,7 @@ body {
 }
 
 input::placeholder {
-    color: #bbb !important;   /* Tono claro */
+    color: #bbb !important;
     opacity: 1;
 }
 
@@ -76,7 +77,7 @@ input::placeholder {
     transition: box-shadow 0.2s, background 0.2s;
 }
 .exercici-item.active {
-    background: #ffc107 !important;   /* Color groc Bootstrap */
+    background: #ffc107 !important;
     color: #222 !important;
     box-shadow: 0 0 0 2px #ffc10755;
 }

@@ -1,8 +1,5 @@
-body {
-    background: #181818;
-    color: #fff;
-    min-height: 100vh;
-}
+
+
 
 .mobile-frame {
     max-width: 800px;
@@ -49,7 +46,7 @@ body {
 
 .container.flex-grow-1 {
     flex-grow: 1;
-    margin-bottom: 70px; /* Espacio para la navbar inferior */
+    margin-bottom: 70px;
 }
 
 @media (max-width: 850px) {

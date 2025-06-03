@@ -11,11 +11,11 @@ from models.entrenaments import Entrenament
 from models.forca import Forca
 from models.cardio import Cardio
 from models.usuari import Usuari
-from utils.csv_utils import editar_rutina_csv, eliminar_entrenament_csv, guardar_entrenament, carregar_entrenaments, carregar_exercicis, eliminar_rutina_csv
+from utils.csv_utils import  eliminar_entrenament_csv, guardar_entrenament, carregar_entrenaments, carregar_exercicis, eliminar_rutina_csv
 from datetime import datetime
 
 
-
+# Configuració de l'aplicació Flask
 app = Flask(__name__)
 app.secret_key = 'daw2025'
 
@@ -35,6 +35,7 @@ def index():
     return render_template('index.html', rutines=rutines, exercicis=carregar_exercicis())
 
 
+# --- Ruta per a la gestió d'entrenaments ---
 @app.route('/entrenaments', methods=['GET', 'POST'])
 def entrenaments():
     if request.method == 'POST':
@@ -59,7 +60,7 @@ def entrenaments():
     exercicis = carregar_exercicis()
     return render_template('entrenament.html', exercicis=exercicis)
 
-
+# --- Ruta per a la creació de rutines ---
 @app.route('/crear_rutina', methods=['GET', 'POST'])
 def crear_rutina():
     exercicis = carregar_exercicis()
@@ -88,7 +89,7 @@ def crear_rutina():
         return redirect(url_for('index'))
     return render_template('crear_rutina.html', exercicis=exercicis)
 
-
+# --- Ruta per a mostrar una rutina específica ---
 @app.route('/rutina/<int:idx>', endpoint='rutina')
 def mostrar_rutina(idx):
     rutines = []
@@ -137,8 +138,11 @@ def editar_rutina(idx):
     return render_template('editar_rutina.html', rutina=rutina, idx=idx)
 
 
+
+# --- Dades del usuari ---
 usuari = Usuari("Senyor/a", "señor@exemple.org")
 
+# --- Ruta per a registrar un entrenament ---
 @app.route('/registrar_entrenament/<int:idx>', methods=['GET', 'POST'])
 def registrar_entrenament(idx):
     rutines = carregar_entrenaments()
@@ -188,6 +192,8 @@ def registrar_entrenament(idx):
         return redirect(url_for('progressos'))
     return render_template('entrenament.html', rutina=rutina, idx=idx)
 
+
+# --- Ruta per a mostrar els progressos ---
 @app.route('/progressos')
 def progressos():
     import csv, json
@@ -265,6 +271,8 @@ def progressos():
 
     return render_template('progressos.html', progressos=progressos, grafiques=grafiques, usuari=usuari)
 
+
+# --- Ruta per a afegir un progrés manualment ---
 @app.route('/afegir_progres', methods=['POST'])
 def afegir_progres():
     data = request.form['data']
@@ -276,6 +284,7 @@ def afegir_progres():
     usuari.guardar_progressos_csv('data/progresos_usuari.csv')
     return redirect(url_for('index'))
 
+# --- Ruta per a eliminar un entrenament o rutina ---
 @app.route('/eliminar_entrenament', methods=['POST'])
 def eliminar_entrenament():
     data = request.form['data']
@@ -290,6 +299,8 @@ def eliminar_rutina():
     eliminar_rutina_csv(titol)
     return redirect(url_for('index'))
 
+
+# --- Ruta per a pujar fitxers de mitjans a un exercici de rutina ---
 @app.route('/pujar_media/<int:idx>/<int:exercici>', methods=['POST'])
 def pujar_media(idx, exercici):
     rutina = carregar_rutina(idx)
@@ -340,5 +351,6 @@ def carregar_rutina(idx):
     return rutines[idx]
 
 
+# --- Inicialització de l'aplicació ---
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001)

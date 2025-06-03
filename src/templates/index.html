@@ -20,6 +20,8 @@
         }
     </style>
 </head>
+
+<!-- Cos de la pàgina amb format mobile-->
 <body>
     <div class="mobile-frame d-flex flex-column" style="position:relative; min-height:100vh; padding-bottom: 100px;">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark w-100">
@@ -45,6 +47,7 @@
             </div>
         </nav>
 
+        <!-- Botons de la pàgina -->
         <div class="container mt-4 mb-5 flex-grow-1">
             <h2 class="text-left mb-4 mt-4">Rutines</h2>
             <div class="d-flex justify-content-center gap-2 mb-3">
@@ -55,6 +58,8 @@
                     <button class="btn btn-secondary btn-md px-5" id="Explorar">📈Progressos</button>
                 </a>
             </div>
+
+            <!-- Llista de rutines -->
             <div class="row mt-3">
                 {% for rutina in rutines %}
                     <div class="col-12 mb-3">

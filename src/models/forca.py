@@ -6,6 +6,7 @@ class Forca(Entrenament):
         super().__init__(nom, descripcio, exercicis)
         self.pes_kg = pes_kg  # atribut públic
 
+    # Conversió a diccionari per a guardar en CSV
     def to_dict(self):
         d = super().to_dict()
         d['pes_kg'] = self.pes_kg
