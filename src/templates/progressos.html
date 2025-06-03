@@ -44,10 +44,6 @@
         <!-- Mostra les gràfiques -->
         {% if usuari.rutina %}
             <h4 class="text-warning mb-3">Rutina: {{ usuari.rutina.titol }}</h4>
-        {% else %}
-            <div class="alert alert-warning text-center">
-                Encara no has creat una rutina.
-            </div>
         {% endif %}
         {% if grafiques %}
             {% for rutina, img in grafiques.items() %}
