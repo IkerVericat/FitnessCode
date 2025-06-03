@@ -1,3 +1,5 @@
+
+# Classe Usuari que gestiona els usuaris i els seus progressos
 class Usuari:
     def __init__(self, nom, email):
         self.nom = nom

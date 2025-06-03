@@ -1,5 +1,6 @@
 import json
 
+# Classe base Entrenament
 class Entrenament:
     def __init__(self, nom, descripcio, exercicis):
         self.nom = nom
